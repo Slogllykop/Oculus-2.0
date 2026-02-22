@@ -70,6 +70,29 @@ export default function WatchClient({ sessionId }: Props) {
 						credential: "your-password"
 					}
 					*/
+					{
+						urls: "stun:stun.relay.metered.ca:80",
+					},
+					{
+						urls: "turn:global.relay.metered.ca:80",
+						username: "0ec1be57ed8f94ea397c6826",
+						credential: "bb3JZ7XOD+uXJwkz",
+					},
+					{
+						urls: "turn:global.relay.metered.ca:80?transport=tcp",
+						username: "0ec1be57ed8f94ea397c6826",
+						credential: "bb3JZ7XOD+uXJwkz",
+					},
+					{
+						urls: "turn:global.relay.metered.ca:443",
+						username: "0ec1be57ed8f94ea397c6826",
+						credential: "bb3JZ7XOD+uXJwkz",
+					},
+					{
+						urls: "turns:global.relay.metered.ca:443?transport=tcp",
+						username: "0ec1be57ed8f94ea397c6826",
+						credential: "bb3JZ7XOD+uXJwkz",
+					},
 				],
 				iceCandidatePoolSize: 10,
 			},
