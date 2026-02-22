@@ -1,14 +1,14 @@
 import { Check, Copy, ExternalLink, Monitor, Radio } from "lucide-react";
 import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { APP_URL } from "./constants";
 
-const VIEWER_BASE_URL = "https://oculus-2-0-viewer.vercel.app"; // Change to production URL when deployed
+const VIEWER_BASE_URL = APP_URL; // Changed to production URL when deployed
 
 type State = "idle" | "broadcasting" | "error";
 
 export default function App() {
 	const [state, setState] = useState<State>("idle");
-	const [sessionId, setSessionId] = useState<string | null>(null);
 	const [shareUrl, setShareUrl] = useState<string>("");
 	const [copied, setCopied] = useState(false);
 	const [error, setError] = useState("");
@@ -16,7 +16,6 @@ export default function App() {
 	useEffect(() => {
 		chrome.runtime.sendMessage({ type: "GET_SESSION" }, (res) => {
 			if (res?.sessionId) {
-				setSessionId(res.sessionId);
 				setShareUrl(`${VIEWER_BASE_URL}/watch/${res.sessionId}`);
 				setState("broadcasting");
 			}
@@ -30,7 +29,6 @@ export default function App() {
 				{ type: "START_BROADCAST", sessionId: id },
 				(res) => {
 					if (res?.success) {
-						setSessionId(id);
 						setShareUrl(`${VIEWER_BASE_URL}/watch/${id}`);
 						setState("broadcasting");
 					} else {
@@ -48,7 +46,6 @@ export default function App() {
 	const stopBroadcast = () => {
 		chrome.runtime.sendMessage({ type: "STOP_BROADCAST" }, () => {
 			setState("idle");
-			setSessionId(null);
 			setShareUrl("");
 		});
 	};
@@ -89,7 +86,7 @@ export default function App() {
 				{state === "idle" && (
 					<>
 						<div className="text-center space-y-2">
-							<div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center mx-auto mb-4">
+							<div className="w-16 h-16 rounded-2xl bg-white/4 border border-white/8 flex items-center justify-center mx-auto mb-4">
 								<Monitor className="w-8 h-8 text-brand-400" />
 							</div>
 							<h2 className="text-base font-semibold text-white">
@@ -101,6 +98,7 @@ export default function App() {
 							</p>
 						</div>
 						<button
+							type="button"
 							onClick={startBroadcast}
 							className="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold transition-all duration-200 shadow-lg shadow-brand-900/30 hover:scale-[1.02] active:scale-[0.98]"
 						>
@@ -123,11 +121,12 @@ export default function App() {
 							<p className="text-[10px] text-zinc-500 font-semibold uppercase tracking-widest">
 								Share Link
 							</p>
-							<div className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+							<div className="flex items-center gap-2 p-3 rounded-xl bg-white/4 border border-white/8">
 								<span className="flex-1 text-xs text-zinc-300 truncate font-mono">
 									{shareUrl}
 								</span>
 								<button
+									type="button"
 									onClick={copyUrl}
 									className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium transition-colors"
 								>
@@ -144,13 +143,15 @@ export default function App() {
 						{/* Actions */}
 						<div className="flex gap-2">
 							<button
+								type="button"
 								onClick={focusToolbox}
-								className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] text-zinc-300 text-xs font-medium transition-colors"
+								className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-white/4 border border-white/8 hover:bg-white/[0.07] text-zinc-300 text-xs font-medium transition-colors"
 							>
 								<ExternalLink className="w-3.5 h-3.5" />
 								Open Toolbox
 							</button>
 							<button
+								type="button"
 								onClick={stopBroadcast}
 								className="flex-1 py-2.5 px-3 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 text-xs font-medium transition-colors"
 							>
@@ -177,8 +178,9 @@ export default function App() {
 						</div>
 						<p className="text-sm text-red-400">{error}</p>
 						<button
+							type="button"
 							onClick={() => setState("idle")}
-							className="px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-zinc-300 text-xs hover:bg-white/[0.07] transition-colors"
+							className="px-4 py-2 rounded-lg bg-white/4 border border-white/8 text-zinc-300 text-xs hover:bg-white/[0.07] transition-colors"
 						>
 							Try Again
 						</button>
@@ -187,7 +189,7 @@ export default function App() {
 			</div>
 
 			{/* Footer */}
-			<div className="px-5 py-3 border-t border-white/[0.05] flex items-center justify-between">
+			<div className="px-5 py-3 border-t border-white/5 flex items-center justify-between">
 				<span className="text-xs text-zinc-700">P2P · Secure · No Servers</span>
 				<span className="text-xs text-zinc-700">v1.0.0</span>
 			</div>

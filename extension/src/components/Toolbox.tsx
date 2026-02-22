@@ -14,8 +14,9 @@ import {
 } from "lucide-react";
 import Peer, { type DataConnection, type MediaConnection } from "peerjs";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { APP_URL } from "@/constants";
 
-const VIEWER_BASE_URL = "https://oculus-2-0-viewer.vercel.app"; // Change to production URL when deployed
+const VIEWER_BASE_URL = APP_URL; // Changed to production URL when deployed
 
 type Quality = "1080p" | "720p" | "480p" | "360p";
 type StreamState = "idle" | "requesting" | "live" | "stopped" | "error";
@@ -106,7 +107,6 @@ export default function Toolbox() {
 	const applyBitrateToAllCalls = useCallback(
 		async (q: Quality) => {
 			for (const call of mediaCallsRef.current.values()) {
-				// @ts-expect-error — peerjs exposes underlying RTCPeerConnection
 				const pc: RTCPeerConnection = call.peerConnection;
 				if (!pc) continue;
 				for (const sender of pc.getSenders()) {
@@ -124,7 +124,6 @@ export default function Toolbox() {
 			const kind = newTrack.kind; // "video" or "audio"
 			const promises: Promise<void>[] = [];
 			for (const call of mediaCallsRef.current.values()) {
-				// @ts-expect-error
 				const pc: RTCPeerConnection = call.peerConnection;
 				if (!pc) continue;
 				for (const sender of pc.getSenders()) {
@@ -245,7 +244,7 @@ export default function Toolbox() {
 			streamRef.current?.getTracks().forEach((t) => t.stop());
 			silentTrackRef.current?.stop();
 		};
-	}, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [sessionId]);
 
 	// ─── Capture screen ───────────────────────────────────────────────────────
 	const startCapture = useCallback(
@@ -340,7 +339,7 @@ export default function Toolbox() {
 			buildOutStream,
 			callViewer,
 		],
-	); // eslint-disable-line react-hooks/exhaustive-deps
+	);
 
 	// ─── Stop stream ──────────────────────────────────────────────────────────
 	const stopStream = useCallback(() => {
@@ -487,6 +486,7 @@ export default function Toolbox() {
 								</p>
 								{(streamState === "error" || streamState === "idle") && (
 									<button
+										type="button"
 										onClick={() => startCapture(false)}
 										className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium transition-colors"
 									>
@@ -531,6 +531,7 @@ export default function Toolbox() {
 								{shareUrl}
 							</span>
 							<button
+								type="button"
 								onClick={copyUrl}
 								className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium transition-colors"
 							>
@@ -556,6 +557,7 @@ export default function Toolbox() {
 						<div className="grid grid-cols-2 gap-2">
 							{(["1080p", "720p", "480p", "360p"] as Quality[]).map((q) => (
 								<button
+									type="button"
 									key={q}
 									onClick={() => changeQuality(q)}
 									disabled={streamState !== "live" && streamState !== "idle"}
@@ -601,6 +603,7 @@ export default function Toolbox() {
 									: "No audio source active."}
 						</p>
 						<button
+							type="button"
 							onClick={toggleAudio}
 							disabled={!outStreamRef.current || !!silentTrackRef.current}
 							className={`w-full py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
@@ -636,6 +639,7 @@ export default function Toolbox() {
 					{/* Change Screen */}
 					{streamState === "live" && (
 						<button
+							type="button"
 							onClick={() => startCapture(true)}
 							className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] text-zinc-300 text-xs font-medium transition-colors"
 						>
@@ -646,6 +650,7 @@ export default function Toolbox() {
 
 					{/* Stop Button */}
 					<button
+						type="button"
 						onClick={stopStream}
 						disabled={streamState === "stopped"}
 						className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-semibold text-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]"
