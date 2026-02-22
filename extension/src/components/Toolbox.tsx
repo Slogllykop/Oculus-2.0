@@ -12,6 +12,7 @@ import {
   Copy,
   Check,
   RefreshCw,
+  Activity,
 } from "lucide-react";
 
 const VIEWER_BASE_URL = "http://localhost:3000"; // Change to production URL when deployed
@@ -19,18 +20,35 @@ const VIEWER_BASE_URL = "http://localhost:3000"; // Change to production URL whe
 type Quality = "1080p" | "720p" | "480p" | "360p";
 type StreamState = "idle" | "requesting" | "live" | "stopped" | "error";
 
-const QUALITY_SETTINGS: Record<Quality, { width: number; height: number; frameRate: number }> = {
-  "1080p": { width: 1920, height: 1080, frameRate: 30 },
-  "720p": { width: 1280, height: 720, frameRate: 30 },
-  "480p": { width: 854, height: 480, frameRate: 24 },
-  "360p": { width: 640, height: 360, frameRate: 20 },
+const QUALITY_SETTINGS: Record<
+  Quality,
+  { width: number; height: number; frameRate: number; maxBitrate: number }
+> = {
+  "1080p": { width: 1920, height: 1080, frameRate: 30, maxBitrate: 8_000_000 },
+  "720p":  { width: 1280, height: 720,  frameRate: 30, maxBitrate: 4_000_000 },
+  "480p":  { width: 854,  height: 480,  frameRate: 24, maxBitrate: 1_500_000 },
+  "360p":  { width: 640,  height: 360,  frameRate: 20, maxBitrate:   600_000 },
 };
+
+/** Create a silent audio track using the Web Audio API as a placeholder.
+ *  This guarantees WebRTC always negotiates an audio m-line so that
+ *  replaceTrack() works when real system audio becomes available later. */
+function createSilentAudioTrack(): MediaStreamTrack {
+  const ctx = new AudioContext();
+  const oscillator = ctx.createOscillator();
+  const dst = ctx.createMediaStreamDestination();
+  oscillator.connect(dst);
+  oscillator.start();
+  const track = dst.stream.getAudioTracks()[0];
+  // Mute it — volume is 0 by default from an unconnected oscillator destination
+  track.enabled = false;
+  return track;
+}
 
 export default function Toolbox() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [streamState, setStreamState] = useState<StreamState>("idle");
   const [quality, setQuality] = useState<Quality>("720p");
-  // audioEnabled = display/system audio is included in the stream
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [viewerCount, setViewerCount] = useState(0);
   const [copied, setCopied] = useState(false);
@@ -38,15 +56,18 @@ export default function Toolbox() {
   const [shareUrl, setShareUrl] = useState("");
   const [peerReady, setPeerReady] = useState(false);
 
-  const peerRef = useRef<Peer | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  // Map of viewerPeerId -> MediaConnection (outgoing call to viewer)
+  const peerRef       = useRef<Peer | null>(null);
+  const streamRef     = useRef<MediaStream | null>(null);
+  // The composed stream we send to peers — always has both video + audio track
+  const outStreamRef  = useRef<MediaStream | null>(null);
+  const silentTrackRef = useRef<MediaStreamTrack | null>(null);
   const mediaCallsRef = useRef<Map<string, MediaConnection>>(new Map());
-  // Map of viewerPeerId -> DataConnection (viewer announcement channel)
-  const dataConnsRef = useRef<Map<string, DataConnection>>(new Map());
-  const previewRef = useRef<HTMLVideoElement>(null);
+  const dataConnsRef  = useRef<Map<string, DataConnection>>(new Map());
+  const previewRef    = useRef<HTMLVideoElement>(null);
+  const qualityRef    = useRef<Quality>("720p");
 
-  // Get session from background
+  useEffect(() => { qualityRef.current = quality; }, [quality]);
+
   useEffect(() => {
     chrome.runtime.sendMessage({ type: "GET_SESSION" }, (res) => {
       if (res?.sessionId) {
@@ -56,7 +77,104 @@ export default function Toolbox() {
     });
   }, []);
 
-  // Initialize PeerJS once we have a sessionId
+  // ─── Apply adaptive bitrate to a single video sender ──────────────────────
+  const applyBitrateToSender = useCallback(async (sender: RTCRtpSender, q: Quality) => {
+    const { maxBitrate } = QUALITY_SETTINGS[q];
+    try {
+      const params = sender.getParameters();
+      if (!params.encodings || params.encodings.length === 0) params.encodings = [{}];
+      params.encodings = params.encodings.map((enc) => ({
+        ...enc,
+        maxBitrate,
+        scaleResolutionDownBy: 1,
+        networkPriority: "high" as RTCPriorityType,
+        priority: "high" as RTCPriorityType,
+      }));
+      await sender.setParameters(params);
+    } catch { /* silently ignore — not supported everywhere */ }
+  }, []);
+
+  // ─── Apply bitrate cap to ALL active calls ─────────────────────────────────
+  const applyBitrateToAllCalls = useCallback(async (q: Quality) => {
+    for (const call of mediaCallsRef.current.values()) {
+      // @ts-ignore — peerjs exposes underlying RTCPeerConnection
+      const pc: RTCPeerConnection = call.peerConnection;
+      if (!pc) continue;
+      for (const sender of pc.getSenders()) {
+        if (sender.track?.kind === "video") await applyBitrateToSender(sender, q);
+      }
+    }
+  }, [applyBitrateToSender]);
+
+  // ─── Replace a specific track kind on ALL active calls ────────────────────
+  const replaceTrackOnAllCalls = useCallback(async (newTrack: MediaStreamTrack) => {
+    const kind = newTrack.kind; // "video" or "audio"
+    const promises: Promise<void>[] = [];
+    for (const call of mediaCallsRef.current.values()) {
+      // @ts-ignore
+      const pc: RTCPeerConnection = call.peerConnection;
+      if (!pc) continue;
+      for (const sender of pc.getSenders()) {
+        if (sender.track?.kind === kind || (sender.track?.kind ?? kind) === kind) {
+          // Match by kind — also handles the case where current track is the silent placeholder
+          if (sender.track?.kind === kind) {
+            promises.push(sender.replaceTrack(newTrack));
+          }
+        }
+      }
+    }
+    await Promise.all(promises);
+  }, []);
+
+  // ─── Build the outgoing stream (video + guaranteed audio track) ────────────
+  const buildOutStream = useCallback((displayStream: MediaStream): MediaStream => {
+    const videoTrack = displayStream.getVideoTracks()[0];
+    const audioTracks = displayStream.getAudioTracks();
+
+    let audioTrack: MediaStreamTrack;
+    if (audioTracks.length > 0) {
+      // Real system audio captured
+      audioTrack = audioTracks[0];
+      if (silentTrackRef.current) {
+        silentTrackRef.current.stop();
+        silentTrackRef.current = null;
+      }
+    } else {
+      // No system audio — insert a silent placeholder so WebRTC negotiates audio
+      const silent = createSilentAudioTrack();
+      silentTrackRef.current = silent;
+      audioTrack = silent;
+    }
+
+    const out = new MediaStream([videoTrack, audioTrack]);
+    outStreamRef.current = out;
+    return out;
+  }, []);
+
+  // ─── Call a viewer — broadcaster → viewer ─────────────────────────────────
+  const callViewer = useCallback((viewerId: string) => {
+    const peer = peerRef.current;
+    const outStream = outStreamRef.current;
+    if (!peer || !outStream) return;
+
+    const call = peer.call(viewerId, outStream);
+    mediaCallsRef.current.set(viewerId, call);
+    setViewerCount((c) => c + 1);
+
+    call.on("stream", () => {
+      setTimeout(() => applyBitrateToAllCalls(qualityRef.current), 1000);
+    });
+    call.on("close", () => {
+      mediaCallsRef.current.delete(viewerId);
+      setViewerCount((c) => Math.max(0, c - 1));
+    });
+    call.on("error", () => {
+      mediaCallsRef.current.delete(viewerId);
+      setViewerCount((c) => Math.max(0, c - 1));
+    });
+  }, [applyBitrateToAllCalls]);
+
+  // ─── Peer setup ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (!sessionId) return;
 
@@ -81,26 +199,15 @@ export default function Toolbox() {
       startCapture();
     });
 
-    // Viewers announce themselves via a data connection
     peer.on("connection", (dataConn) => {
       const viewerId = dataConn.peer;
       dataConnsRef.current.set(viewerId, dataConn);
 
       dataConn.on("open", () => {
-        // Broadcaster calls the viewer with the current stream
-        if (streamRef.current) {
-          callViewer(viewerId);
-        }
+        if (outStreamRef.current) callViewer(viewerId);
       });
-
-      dataConn.on("close", () => {
-        dataConnsRef.current.delete(viewerId);
-        // The media call close event handles viewer count
-      });
-
-      dataConn.on("error", () => {
-        dataConnsRef.current.delete(viewerId);
-      });
+      dataConn.on("close", () => dataConnsRef.current.delete(viewerId));
+      dataConn.on("error", () => dataConnsRef.current.delete(viewerId));
     });
 
     peer.on("error", (err) => {
@@ -112,41 +219,24 @@ export default function Toolbox() {
     return () => {
       peer.destroy();
       streamRef.current?.getTracks().forEach((t) => t.stop());
+      silentTrackRef.current?.stop();
     };
   }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const callViewer = useCallback((viewerId: string) => {
-    const peer = peerRef.current;
-    const stream = streamRef.current;
-    if (!peer || !stream) return;
-
-    const call = peer.call(viewerId, stream);
-    mediaCallsRef.current.set(viewerId, call);
-    setViewerCount((c) => c + 1);
-
-    call.on("close", () => {
-      mediaCallsRef.current.delete(viewerId);
-      setViewerCount((c) => Math.max(0, c - 1));
-    });
-
-    call.on("error", () => {
-      mediaCallsRef.current.delete(viewerId);
-      setViewerCount((c) => Math.max(0, c - 1));
-    });
-  }, []);
-
-  const startCapture = useCallback(async () => {
-    setStreamState("requesting");
+  // ─── Capture screen ───────────────────────────────────────────────────────
+  const startCapture = useCallback(async (isReplace = false) => {
+    if (!isReplace) setStreamState("requesting");
     setError("");
+
+    const q = QUALITY_SETTINGS[qualityRef.current];
+
     try {
-      const q = QUALITY_SETTINGS[quality];
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           width: { ideal: q.width },
           height: { ideal: q.height },
           frameRate: { ideal: q.frameRate },
         },
-        // Capture system/tab/desktop audio
         audio: {
           echoCancellation: false,
           noiseSuppression: false,
@@ -154,38 +244,78 @@ export default function Toolbox() {
         },
       });
 
-      streamRef.current = displayStream;
+      const newVideoTrack = displayStream.getVideoTracks()[0];
+      const newAudioTracks = displayStream.getAudioTracks();
+      const hasRealAudio = newAudioTracks.length > 0;
 
-      // Track whether audio was actually granted by the browser
-      const hasAudio = displayStream.getAudioTracks().length > 0;
-      setAudioEnabled(hasAudio);
+      if (isReplace && outStreamRef.current) {
+        // ── Replace video track on all active peer connections ───────────────
+        await replaceTrackOnAllCalls(newVideoTrack);
 
+        // ── Replace audio track on all active peer connections ───────────────
+        let newAudioTrack: MediaStreamTrack;
+        if (hasRealAudio) {
+          newAudioTrack = newAudioTracks[0];
+          // Replace the silent placeholder or old audio with real audio
+          await replaceTrackOnAllCalls(newAudioTrack);
+          if (silentTrackRef.current) {
+            silentTrackRef.current.stop();
+            silentTrackRef.current = null;
+          }
+        } else {
+          // No audio selected — insert a fresh silent track
+          const silent = createSilentAudioTrack();
+          silentTrackRef.current = silent;
+          newAudioTrack = silent;
+          await replaceTrackOnAllCalls(newAudioTrack);
+        }
+
+        // Stop old tracks from the previous display stream
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+
+        // Update refs
+        streamRef.current = displayStream;
+        const newOut = new MediaStream([newVideoTrack, newAudioTrack]);
+        outStreamRef.current = newOut;
+      } else {
+        streamRef.current = displayStream;
+        buildOutStream(displayStream);
+      }
+
+      // Update local preview (show raw display stream)
       if (previewRef.current) {
         previewRef.current.srcObject = displayStream;
       }
 
+      setAudioEnabled(hasRealAudio);
       setStreamState("live");
 
-      // Handle user stopping stream via browser's built-in "Stop sharing" button
-      displayStream.getVideoTracks()[0].addEventListener("ended", () => {
-        stopStream();
-      });
+      // Apply adaptive bitrate
+      await applyBitrateToAllCalls(qualityRef.current);
 
-      // Call any viewers who connected before stream was ready
-      dataConnsRef.current.forEach((_dc, viewerId) => {
-        if (!mediaCallsRef.current.has(viewerId)) {
-          callViewer(viewerId);
-        }
-      });
+      // Handle native browser "Stop sharing" button
+      newVideoTrack.addEventListener("ended", () => stopStream());
+
+      // If initial capture, call any viewers already waiting
+      if (!isReplace) {
+        dataConnsRef.current.forEach((_dc, viewerId) => {
+          if (!mediaCallsRef.current.has(viewerId)) callViewer(viewerId);
+        });
+      }
     } catch {
-      setError("Screen capture was denied or cancelled.");
-      setStreamState("error");
+      if (!isReplace) {
+        setError("Screen capture was denied or cancelled.");
+        setStreamState("error");
+      }
     }
-  }, [quality, callViewer]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [applyBitrateToAllCalls, replaceTrackOnAllCalls, buildOutStream, callViewer]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ─── Stop stream ──────────────────────────────────────────────────────────
   const stopStream = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
+    silentTrackRef.current?.stop();
     streamRef.current = null;
+    outStreamRef.current = null;
     mediaCallsRef.current.forEach((call) => call.close());
     mediaCallsRef.current.clear();
     dataConnsRef.current.forEach((dc) => dc.close());
@@ -197,36 +327,43 @@ export default function Toolbox() {
     setTimeout(() => window.close(), 1500);
   }, []);
 
-  const changeQuality = useCallback(
-    async (newQuality: Quality) => {
-      setQuality(newQuality);
-      if (streamState !== "live" || !streamRef.current) return;
-      const q = QUALITY_SETTINGS[newQuality];
-      const videoTrack = streamRef.current.getVideoTracks()[0];
-      if (videoTrack) {
+  // ─── Change quality ───────────────────────────────────────────────────────
+  const changeQuality = useCallback(async (newQuality: Quality) => {
+    setQuality(newQuality);
+    qualityRef.current = newQuality;
+    if (streamState !== "live" || !streamRef.current) return;
+
+    const q = QUALITY_SETTINGS[newQuality];
+    const videoTrack = streamRef.current.getVideoTracks()[0];
+
+    if (videoTrack) {
+      try {
         await videoTrack.applyConstraints({
-          width: { ideal: q.width },
-          height: { ideal: q.height },
+          width:     { ideal: q.width },
+          height:    { ideal: q.height },
           frameRate: { ideal: q.frameRate },
         });
-      }
-    },
-    [streamState]
-  );
+      } catch { /* applyConstraints not supported on all display tracks */ }
+    }
 
+    await applyBitrateToAllCalls(newQuality);
+  }, [streamState, applyBitrateToAllCalls]);
+
+  // ─── Toggle system audio (mute/unmute the audio track) ────────────────────
   const toggleAudio = useCallback(() => {
-    if (!streamRef.current) return;
-    const audioTracks = streamRef.current.getAudioTracks();
-    if (audioTracks.length === 0) {
-      // No system audio was captured — nothing to toggle
-      setError("No system audio was captured. Re-share your screen and enable 'Share system audio'.");
+    if (!outStreamRef.current) return;
+    const audioTracks = outStreamRef.current.getAudioTracks();
+
+    if (audioTracks.length === 0 || silentTrackRef.current) {
+      // Only silent placeholder — can't enable real audio without re-sharing
+      setError("No system audio captured. Re-share your screen and enable 'Share system audio'.");
       return;
     }
+
     const next = !audioEnabled;
-    audioTracks.forEach((t) => {
-      t.enabled = next;
-    });
+    audioTracks.forEach((t) => { t.enabled = next; });
     setAudioEnabled(next);
+    setError("");
   }, [audioEnabled]);
 
   const copyUrl = async () => {
@@ -236,42 +373,42 @@ export default function Toolbox() {
   };
 
   const statusColor = {
-    idle: "bg-gray-500",
+    idle:       "bg-zinc-600",
     requesting: "bg-yellow-500 animate-pulse",
-    live: "bg-red-500 animate-pulse",
-    stopped: "bg-gray-500",
-    error: "bg-red-700",
+    live:       "bg-red-500 animate-pulse",
+    stopped:    "bg-zinc-600",
+    error:      "bg-red-700",
   }[streamState];
 
   const statusLabel = {
-    idle: "Idle",
+    idle:       "Idle",
     requesting: "Requesting...",
-    live: "LIVE",
-    stopped: "Stopped",
-    error: "Error",
+    live:       "LIVE",
+    stopped:    "Stopped",
+    error:      "Error",
   }[streamState];
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 font-sans flex flex-col">
+    <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col">
       {/* Top Bar */}
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-gray-900/60 backdrop-blur-sm sticky top-0 z-10">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.07] bg-zinc-950/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
             <Monitor className="w-4 h-4 text-white" />
           </div>
           <div>
-            <h1 className="text-sm font-bold text-white">Oculus Broadcaster</h1>
-            <p className="text-xs text-gray-500">Control Panel</p>
+            <h1 className="text-sm font-bold text-white tracking-wide">Oculus</h1>
+            <p className="text-xs text-zinc-500">Broadcaster Control</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
             <span className={`w-2 h-2 rounded-full ${statusColor}`} />
-            <span className="text-xs font-medium text-gray-300">{statusLabel}</span>
+            <span className="text-xs font-medium text-zinc-300">{statusLabel}</span>
           </div>
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
             <Users className="w-3.5 h-3.5 text-brand-400" />
-            <span className="text-xs font-medium text-gray-300">{viewerCount}</span>
+            <span className="text-xs font-medium text-zinc-300">{viewerCount}</span>
           </div>
         </div>
       </header>
@@ -279,7 +416,7 @@ export default function Toolbox() {
       <div className="flex flex-1 gap-6 p-6 max-w-5xl mx-auto w-full">
         {/* Preview */}
         <div className="flex-1 flex flex-col gap-4">
-          <div className="relative rounded-2xl overflow-hidden bg-gray-900 border border-white/[0.08] aspect-video">
+          <div className="relative rounded-2xl overflow-hidden bg-zinc-950 border border-white/[0.07] aspect-video">
             <video
               ref={previewRef}
               autoPlay
@@ -289,10 +426,10 @@ export default function Toolbox() {
             />
             {streamState !== "live" && (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                  <Monitor className="w-8 h-8 text-gray-600" />
+                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
+                  <Monitor className="w-8 h-8 text-zinc-600" />
                 </div>
-                <p className="text-sm text-gray-500 text-center px-4">
+                <p className="text-sm text-zinc-500 text-center px-4">
                   {streamState === "requesting"
                     ? "Waiting for screen selection..."
                     : streamState === "stopped"
@@ -303,7 +440,7 @@ export default function Toolbox() {
                 </p>
                 {(streamState === "error" || streamState === "idle") && (
                   <button
-                    onClick={startCapture}
+                    onClick={() => startCapture(false)}
                     className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium transition-colors"
                   >
                     {streamState === "error" ? "Retry Capture" : "Start Capture"}
@@ -311,41 +448,37 @@ export default function Toolbox() {
                 )}
               </div>
             )}
-            {/* Live badge */}
             {streamState === "live" && (
               <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/90 backdrop-blur-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
                 <span className="text-xs font-bold text-white">LIVE</span>
               </div>
             )}
-            {/* Connection status */}
             <div className="absolute top-3 right-3">
               {peerReady ? (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 backdrop-blur-sm border border-green-500/30">
-                  <Wifi className="w-3 h-3 text-green-400" />
-                  <span className="text-xs text-green-400">Ready</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-500/10 backdrop-blur-sm border border-brand-500/20">
+                  <Wifi className="w-3 h-3 text-brand-400" />
+                  <span className="text-xs text-brand-400">Ready</span>
                 </div>
               ) : (
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-700/60 backdrop-blur-sm">
-                  <WifiOff className="w-3 h-3 text-gray-400" />
-                  <span className="text-xs text-gray-400">Connecting...</span>
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.06] backdrop-blur-sm border border-white/[0.08]">
+                  <WifiOff className="w-3 h-3 text-zinc-500" />
+                  <span className="text-xs text-zinc-500">Connecting...</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Error toast */}
-          {error && streamState === "live" && (
+          {error && (
             <div className="flex items-start gap-2 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs">
               <span className="mt-0.5">⚠</span>
               <span>{error}</span>
             </div>
           )}
 
-          {/* Share URL */}
           {shareUrl && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/[0.08]">
-              <span className="flex-1 text-xs text-gray-400 truncate font-mono">{shareUrl}</span>
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.07]">
+              <span className="flex-1 text-xs text-zinc-400 truncate font-mono">{shareUrl}</span>
               <button
                 onClick={copyUrl}
                 className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium transition-colors"
@@ -359,8 +492,9 @@ export default function Toolbox() {
 
         {/* Controls Panel */}
         <div className="w-64 flex flex-col gap-4">
-          {/* Quality Selector */}
-          <div className="rounded-2xl bg-gray-900 border border-white/[0.08] p-4 space-y-3">
+
+          {/* Quality */}
+          <div className="rounded-2xl bg-zinc-950 border border-white/[0.07] p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Settings className="w-4 h-4 text-brand-400" />
               <h3 className="text-sm font-semibold text-white">Quality</h3>
@@ -370,51 +504,61 @@ export default function Toolbox() {
                 <button
                   key={q}
                   onClick={() => changeQuality(q)}
-                  className={`py-2 rounded-lg text-xs font-medium transition-all ${
+                  disabled={streamState !== "live" && streamState !== "idle"}
+                  className={`py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                     quality === q
-                      ? "bg-brand-600 text-white shadow-lg shadow-brand-900/40"
-                      : "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-gray-200"
+                      ? "bg-brand-600 text-white shadow-lg shadow-brand-900/30"
+                      : "bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:bg-white/[0.08] hover:text-white"
                   }`}
                 >
                   {q}
                 </button>
               ))}
             </div>
+            <div className="flex items-center gap-1.5 pt-1">
+              <Activity className="w-3 h-3 text-zinc-600" />
+              <p className="text-[10px] text-zinc-600">
+                Adaptive bitrate · up to {
+                  { "1080p": "8", "720p": "4", "480p": "1.5", "360p": "0.6" }[quality]
+                } Mbps
+              </p>
+            </div>
           </div>
 
-          {/* Audio Toggle (System / Desktop audio) */}
-          <div className="rounded-2xl bg-gray-900 border border-white/[0.08] p-4 space-y-3">
+          {/* System Audio */}
+          <div className="rounded-2xl bg-zinc-950 border border-white/[0.07] p-4 space-y-3">
             <div className="flex items-center gap-2">
-              {audioEnabled ? (
-                <Volume2 className="w-4 h-4 text-brand-400" />
-              ) : (
-                <VolumeX className="w-4 h-4 text-gray-500" />
-              )}
+              {audioEnabled
+                ? <Volume2 className="w-4 h-4 text-brand-400" />
+                : <VolumeX className="w-4 h-4 text-zinc-500" />
+              }
               <h3 className="text-sm font-semibold text-white">System Audio</h3>
             </div>
-            <p className="text-xs text-gray-500 leading-relaxed">
+            <p className="text-xs text-zinc-500 leading-relaxed">
               {audioEnabled
-                ? "Desktop audio is being shared with viewers."
-                : "Desktop audio is muted. Toggle to share sound from your screen."}
+                ? "Desktop audio is live — viewers can hear it."
+                : silentTrackRef.current
+                ? "No system audio captured. Re-share screen & enable 'Share system audio'."
+                : "No audio source active."}
             </p>
             <button
               onClick={toggleAudio}
-              disabled={!streamRef.current}
+              disabled={!outStreamRef.current || !!silentTrackRef.current}
               className={`w-full py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                 audioEnabled
-                  ? "bg-brand-600/20 border border-brand-500/40 text-brand-300 hover:bg-brand-600/30"
-                  : "bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10 hover:text-gray-200"
+                  ? "bg-brand-600/20 border border-brand-500/30 text-brand-300 hover:bg-brand-600/30"
+                  : "bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:bg-white/[0.08] hover:text-white"
               }`}
             >
               {audioEnabled ? "Mute Audio" : "Unmute Audio"}
             </button>
-            <p className="text-[10px] text-gray-600 leading-relaxed">
-              To share audio, enable &quot;Share system audio&quot; in the browser screen picker.
+            <p className="text-[10px] text-zinc-700 leading-relaxed">
+              Enable &quot;Share system audio&quot; in the browser screen picker to share desktop sound.
             </p>
           </div>
 
           {/* Viewer Count */}
-          <div className="rounded-2xl bg-gray-900 border border-white/[0.08] p-4">
+          <div className="rounded-2xl bg-zinc-950 border border-white/[0.07] p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Users className="w-4 h-4 text-brand-400" />
@@ -422,8 +566,19 @@ export default function Toolbox() {
               </div>
               <span className="text-2xl font-bold text-white">{viewerCount}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-1">Active connections</p>
+            <p className="text-xs text-zinc-600 mt-1">Active connections</p>
           </div>
+
+          {/* Change Screen */}
+          {streamState === "live" && (
+            <button
+              onClick={() => startCapture(true)}
+              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] text-zinc-300 text-xs font-medium transition-colors"
+            >
+              <RefreshCw className="w-3.5 h-3.5" />
+              Change Screen / Window
+            </button>
+          )}
 
           {/* Stop Button */}
           <button
@@ -434,16 +589,6 @@ export default function Toolbox() {
             <Square className="w-4 h-4 fill-red-400" />
             Stop Broadcasting
           </button>
-
-          {streamState === "live" && (
-            <button
-              onClick={startCapture}
-              className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 text-gray-300 text-xs font-medium transition-colors"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Change Screen
-            </button>
-          )}
         </div>
       </div>
     </div>
