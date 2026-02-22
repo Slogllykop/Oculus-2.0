@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+  html {
+    font-family: "Inter", system-ui, sans-serif;
+  }
+  body {
+    background-color: #030712;
+    color: #f9fafb;
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .glow-brand {
+    box-shadow: 0 0 30px rgba(98, 113, 245, 0.25);
+  }
+
+  .video-container {
+    position: relative;
+    width: 100%;
+    background: #0a0a0f;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+}
