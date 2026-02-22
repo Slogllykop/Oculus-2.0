@@ -201,22 +201,28 @@ export default function Toolbox() {
 	useEffect(() => {
 		if (!sessionId) return;
 
-		const peer = new Peer(
-			`oculus-host-${sessionId}`,
-			//     {
-			// 	host: "0.peerjs.com",
-			// 	port: 443,
-			// 	secure: true,
-			// 	path: "/",
-			// 	config: {
-			// 		iceServers: [
-			// 			{ urls: "stun:stun.l.google.com:19302" },
-			// 			{ urls: "stun:stun1.l.google.com:19302" },
-			// 			{ urls: "stun:global.stun.twilio.com:3478" },
-			// 		],
-			// 	},
-			// }
-		);
+		const peer = new Peer(`oculus-host-${sessionId}`, {
+			debug: 2,
+			config: {
+				iceServers: [
+					{ urls: "stun:stun.l.google.com:19302" },
+					{ urls: "stun:stun1.l.google.com:19302" },
+					{ urls: "stun:stun2.l.google.com:19302" },
+					{ urls: "stun:stun3.l.google.com:19302" },
+					{ urls: "stun:stun4.l.google.com:19302" },
+					{ urls: "stun:global.stun.twilio.com:3478" },
+					// Add your TURN servers here for 100% reliability (e.g., Metered.ca)
+					/*
+					{
+						urls: "turn:your-turn-server.com:3478",
+						username: "your-username",
+						credential: "your-password"
+					}
+					*/
+				],
+				iceCandidatePoolSize: 10,
+			},
+		});
 
 		peerRef.current = peer;
 
