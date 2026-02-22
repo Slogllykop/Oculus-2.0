@@ -52,19 +52,21 @@ export default function WatchClient({ sessionId }: Props) {
 
 		const broadcasterId = `oculus-host-${sessionId}`;
 
-		const peer = new Peer({
-			host: "0.peerjs.com",
-			port: 443,
-			secure: true,
-			path: "/",
-			config: {
-				iceServers: [
-					{ urls: "stun:stun.l.google.com:19302" },
-					{ urls: "stun:stun1.l.google.com:19302" },
-					{ urls: "stun:global.stun.twilio.com:3478" },
-				],
-			},
-		});
+		const peer = new Peer(
+			//     {
+			// 	host: "0.peerjs.com",
+			// 	port: 443,
+			// 	secure: true,
+			// 	path: "/",
+			// 	config: {
+			// 		iceServers: [
+			// 			{ urls: "stun:stun.l.google.com:19302" },
+			// 			{ urls: "stun:stun1.l.google.com:19302" },
+			// 			{ urls: "stun:global.stun.twilio.com:3478" },
+			// 		],
+			// 	},
+			// }
+		);
 
 		peerRef.current = peer;
 

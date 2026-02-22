@@ -201,19 +201,22 @@ export default function Toolbox() {
 	useEffect(() => {
 		if (!sessionId) return;
 
-		const peer = new Peer(`oculus-host-${sessionId}`, {
-			host: "0.peerjs.com",
-			port: 443,
-			secure: true,
-			path: "/",
-			config: {
-				iceServers: [
-					{ urls: "stun:stun.l.google.com:19302" },
-					{ urls: "stun:stun1.l.google.com:19302" },
-					{ urls: "stun:global.stun.twilio.com:3478" },
-				],
-			},
-		});
+		const peer = new Peer(
+			`oculus-host-${sessionId}`,
+			//     {
+			// 	host: "0.peerjs.com",
+			// 	port: 443,
+			// 	secure: true,
+			// 	path: "/",
+			// 	config: {
+			// 		iceServers: [
+			// 			{ urls: "stun:stun.l.google.com:19302" },
+			// 			{ urls: "stun:stun1.l.google.com:19302" },
+			// 			{ urls: "stun:global.stun.twilio.com:3478" },
+			// 		],
+			// 	},
+			// }
+		);
 
 		peerRef.current = peer;
 
