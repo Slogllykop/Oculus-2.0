@@ -191,7 +191,7 @@ export default function App() {
 			{/* Footer */}
 			<div className="px-5 py-3 border-t border-white/5 flex items-center justify-between">
 				<span className="text-xs text-zinc-700">P2P · Secure · No Servers</span>
-				<span className="text-xs text-zinc-700">v1.0.0</span>
+				<span className="text-xs text-zinc-700">v1.1.1</span>
 			</div>
 		</div>
 	);

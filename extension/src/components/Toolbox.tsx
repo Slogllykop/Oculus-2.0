@@ -41,7 +41,7 @@ function createSilentAudioTrack(): MediaStreamTrack {
 	oscillator.connect(dst);
 	oscillator.start();
 	const track = dst.stream.getAudioTracks()[0];
-	// Mute it — volume is 0 by default from an unconnected oscillator destination
+	// Mute it - volume is 0 by default from an unconnected oscillator destination
 	track.enabled = false;
 	return track;
 }
@@ -59,7 +59,7 @@ export default function Toolbox() {
 
 	const peerRef = useRef<Peer | null>(null);
 	const streamRef = useRef<MediaStream | null>(null);
-	// The composed stream we send to peers — always has both video + audio track
+	// The composed stream we send to peers - always has both video + audio track
 	const outStreamRef = useRef<MediaStream | null>(null);
 	const silentTrackRef = useRef<MediaStreamTrack | null>(null);
 	const mediaCallsRef = useRef<Map<string, MediaConnection>>(new Map());
@@ -97,7 +97,7 @@ export default function Toolbox() {
 				}));
 				await sender.setParameters(params);
 			} catch {
-				/* silently ignore — not supported everywhere */
+				/* silently ignore - not supported everywhere */
 			}
 		},
 		[],
@@ -131,7 +131,7 @@ export default function Toolbox() {
 						sender.track?.kind === kind ||
 						(sender.track?.kind ?? kind) === kind
 					) {
-						// Match by kind — also handles the case where current track is the silent placeholder
+						// Match by kind - also handles the case where current track is the silent placeholder
 						if (sender.track?.kind === kind) {
 							promises.push(sender.replaceTrack(newTrack));
 						}
@@ -158,7 +158,7 @@ export default function Toolbox() {
 					silentTrackRef.current = null;
 				}
 			} else {
-				// No system audio — insert a silent placeholder so WebRTC negotiates audio
+				// No system audio - insert a silent placeholder so WebRTC negotiates audio
 				const silent = createSilentAudioTrack();
 				silentTrackRef.current = silent;
 				audioTrack = silent;
@@ -171,7 +171,7 @@ export default function Toolbox() {
 		[],
 	);
 
-	// ─── Call a viewer — broadcaster → viewer ─────────────────────────────────
+	// ─── Call a viewer - broadcaster → viewer ─────────────────────────────────
 	const callViewer = useCallback(
 		(viewerId: string) => {
 			const peer = peerRef.current;
@@ -287,7 +287,7 @@ export default function Toolbox() {
 							silentTrackRef.current = null;
 						}
 					} else {
-						// No audio selected — insert a fresh silent track
+						// No audio selected - insert a fresh silent track
 						const silent = createSilentAudioTrack();
 						silentTrackRef.current = silent;
 						newAudioTrack = silent;
@@ -391,7 +391,7 @@ export default function Toolbox() {
 		const audioTracks = outStreamRef.current.getAudioTracks();
 
 		if (audioTracks.length === 0 || silentTrackRef.current) {
-			// Only silent placeholder — can't enable real audio without re-sharing
+			// Only silent placeholder - can't enable real audio without re-sharing
 			setError(
 				"No system audio captured. Re-share your screen and enable 'Share system audio'.",
 			);
@@ -597,7 +597,7 @@ export default function Toolbox() {
 						</div>
 						<p className="text-xs text-zinc-500 leading-relaxed">
 							{audioEnabled
-								? "Desktop audio is live — viewers can hear it."
+								? "Desktop audio is live - viewers can hear it."
 								: silentTrackRef.current
 									? "No system audio captured. Re-share screen & enable 'Share system audio'."
 									: "No audio source active."}

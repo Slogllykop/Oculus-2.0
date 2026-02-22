@@ -1,8 +1,8 @@
-# 🔭 Oculus — Peer-to-Peer Screen Sharing
+# 🔭 Oculus - Peer-to-Peer Screen Sharing
 
 A modern, dark-mode P2P screen sharing app consisting of:
-- **`extension/`** — Chrome extension (broadcaster)
-- **`viewer/`** — Next.js website (viewer)
+- **`extension/`** - Chrome extension (broadcaster)
+- **`viewer/`** - Next.js website (viewer)
 
 ---
 
@@ -62,8 +62,8 @@ npm run build      # outputs to extension/dist/
 ## Features
 
 ### Extension (Broadcaster)
-- **Popup** — Click "Start Sharing" to generate a unique share URL
-- **Toolbox Tab** — Full control panel that stays alive when popup is closed:
+- **Popup** - Click "Start Sharing" to generate a unique share URL
+- **Toolbox Tab** - Full control panel that stays alive when popup is closed:
   - Quality selector: 1080p / 720p / 480p / 360p
   - Audio toggle (mic on/off)
   - Live viewer count
@@ -112,7 +112,7 @@ npm run dev
 
 - The viewer can be deployed to **Vercel**, **Netlify**, or any Node.js host
 - After deploying, update the `VIEWER_BASE_URL` constant in the extension source files and rebuild
-- PeerJS uses the free public signaling server by default — for production use, consider [self-hosting PeerJS server](https://github.com/peers/peerjs-server)
+- PeerJS uses the free public signaling server by default - for production use, consider [self-hosting PeerJS server](https://github.com/peers/peerjs-server)
 
 ---
 
@@ -124,5 +124,5 @@ npm run dev
 4. `getDisplayMedia()` captures the screen
 5. A shareable URL is generated: `https://your-viewer.com/watch/{sessionId}`
 6. When a viewer opens the URL, they create a PeerJS connection and call the broadcaster peer
-7. The broadcaster answers with the `MediaStream` — video streams P2P!
-8. The extension popup can be closed — the toolbox tab keeps streaming
+7. The broadcaster answers with the `MediaStream` - video streams P2P!
+8. The extension popup can be closed - the toolbox tab keeps streaming
