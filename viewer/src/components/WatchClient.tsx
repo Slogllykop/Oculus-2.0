@@ -23,7 +23,11 @@ interface Props {
 
 export default function WatchClient({ sessionId }: Props) {
     const [viewState, setViewState] = useState<ViewState>("connecting");
-    const [muted, setMuted] = useState(false);
+    const setViewStateSync = (s: ViewState) => {
+        viewStateRef.current = s;
+        setViewState(s);
+    };
+    const [muted, setMuted] = useState(true);
     const [errorMsg, setErrorMsg] = useState("");
     const [retryCount, setRetryCount] = useState(0);
     const [showControls, setShowControls] = useState(true);
@@ -33,6 +37,7 @@ export default function WatchClient({ sessionId }: Props) {
     const containerRef = useRef<HTMLDivElement>(null);
     const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const viewStateRef = useRef<ViewState>("connecting");
 
     const connect = useCallback(() => {
         if (peerRef.current) {
@@ -59,43 +64,64 @@ export default function WatchClient({ sessionId }: Props) {
         peerRef.current = peer;
 
         peer.on("open", () => {
-            setViewState("waiting");
+            setViewStateSync("waiting");
             // Announce ourselves to the broadcaster via a data connection.
             // The broadcaster will call us back with the media stream.
             const dataConn = peer.connect(broadcasterId, { reliable: true });
-            dataConn.on("error", () => {
-                scheduleRetry();
+            // Do NOT retry on data connection error — the broadcaster may call
+            // us back slightly after the data channel opens. Premature retry
+            // would destroy the peer before the incoming call arrives.
+            dataConn.on("error", (err) => {
+                console.warn("Data connection error:", err);
             });
         });
 
         // Broadcaster calls us back with the stream
         peer.on("call", (call) => {
-            call.answer(); // answer with no stream — we only receive
+            // Answer with no outgoing stream — viewer only receives
+            call.answer();
 
             call.on("stream", (remoteStream) => {
-                if (videoRef.current) {
-                    videoRef.current.srcObject = remoteStream;
-                    videoRef.current.play().catch(() => {});
+                const video = videoRef.current;
+                if (video) {
+                    video.srcObject = remoteStream;
+                    // Start muted to satisfy browser autoplay policy,
+                    // then play. The UI mute button lets the user unmute.
+                    video.muted = true;
+                    video.play().catch((e) => {
+                        console.warn("Autoplay failed:", e);
+                    });
                 }
-                setViewState("streaming");
+                setMuted(true);
+                setViewStateSync("streaming");
             });
 
-            call.on("close", () => setViewState("disconnected"));
-            call.on("error", () => setViewState("disconnected"));
+            call.on("close", () => setViewStateSync("disconnected"));
+            call.on("error", () => setViewStateSync("disconnected"));
         });
 
         peer.on("error", (err) => {
             if (err.type === "peer-unavailable") {
-                setViewState("waiting");
+                setViewStateSync("waiting");
                 scheduleRetry();
             } else {
                 setErrorMsg(`Connection error: ${err.message}`);
-                setViewState("error");
+                setViewStateSync("error");
             }
         });
 
         peer.on("disconnected", () => {
-            scheduleRetry();
+            // Only retry if we are not already streaming — a "disconnected"
+            // event during an active stream is a signalling-server blip and
+            // can often be recovered with reconnect() rather than a full
+            // peer rebuild.
+            if (viewStateRef.current !== "streaming") {
+                scheduleRetry();
+            } else {
+                // Try to reconnect to the signalling server without destroying
+                // the existing media connection.
+                try { peer.reconnect(); } catch { scheduleRetry(); }
+            }
         });
     }, [sessionId]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -147,13 +173,14 @@ export default function WatchClient({ sessionId }: Props) {
 
     const toggleMute = () => {
         if (videoRef.current) {
-            videoRef.current.muted = !videoRef.current.muted;
-            setMuted((m) => !m);
+            const next = !videoRef.current.muted;
+            videoRef.current.muted = next;
+            setMuted(next);
         }
     };
 
     const retry = () => {
-        setViewState("connecting");
+        setViewStateSync("connecting");
         setErrorMsg("");
         if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
         setRetryCount((c) => c + 1);
