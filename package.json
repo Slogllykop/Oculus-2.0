@@ -1,0 +1,18 @@
+{
+    "name": "oculus",
+    "version": "1.1.0",
+    "private": true,
+    "scripts": {
+        "lint": "biome check .",
+        "lint:fix": "biome check . --write",
+        "format": "biome format . --write",
+        "release": "standard-version"
+    },
+    "engines": {
+        "node": ">=18",
+        "pnpm": ">=8"
+    },
+    "dependencies": {
+        "@biomejs/biome": "^2.4.4"
+    }
+}

@@ -1,38 +1,27 @@
-import { defineConfig } from "vite";
+import path from "node:path";
+import { crx } from "@crxjs/vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { viteStaticCopy } from "vite-plugin-static-copy";
-import { resolve } from "path";
+import { defineConfig } from "vite";
+import manifest from "./manifest.json";
 
 export default defineConfig({
-  plugins: [
-    react(),
-    viteStaticCopy({
-      targets: [
-        { src: "manifest.json", dest: "." },
-        { src: "icons", dest: "." },
-      ],
-    }),
-  ],
-  build: {
-    outDir: "dist",
-    emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        index: resolve(__dirname, "index.html"),
-        toolbox: resolve(__dirname, "toolbox.html"),
-        background: resolve(__dirname, "src/background.ts"),
-      },
-      output: {
-        entryFileNames: (chunkInfo) => {
-          if (chunkInfo.name === "background") return "background.js";
-          return "assets/[name]-[hash].js";
+    plugins: [
+        react({
+            babel: {
+                plugins: [["babel-plugin-react-compiler"]],
+            },
+        }),
+        tailwindcss(),
+        crx({ manifest }),
+    ],
+    resolve: {
+        alias: {
+            "@": path.resolve(__dirname, "./src"),
         },
-      },
     },
-  },
-  resolve: {
-    alias: {
-      "@": resolve(__dirname, "./src"),
+    build: {
+        outDir: "dist",
+        emptyOutDir: true,
     },
-  },
 });
