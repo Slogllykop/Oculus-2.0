@@ -55,7 +55,7 @@ export default function WatchClient({ sessionId }: Props) {
 
         let iceServers: RTCIceServer[] = [];
         try {
-            const res = await fetch("https://speed.cloudflare.com/turn-creds", {
+            const res = await fetch("/api/turn", {
                 signal: abortController.signal,
             });
             const creds = await res.json();
