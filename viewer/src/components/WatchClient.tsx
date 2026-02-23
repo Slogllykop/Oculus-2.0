@@ -305,12 +305,14 @@ export default function WatchClient({ sessionId }: Props) {
                                             Stream will start automatically when the broadcaster
                                             goes live
                                         </p>
-                                        <div className="flex items-center justify-center gap-2 mt-3">
-                                            <Loader2 className="w-3.5 h-3.5 text-zinc-600 animate-spin" />
-                                            <span className="text-xs text-zinc-600">
-                                                Retrying... (attempt {retryCount + 1})
-                                            </span>
-                                        </div>
+                                        {retryCount > 0 && (
+                                            <div className="flex items-center justify-center gap-2 mt-3">
+                                                <Loader2 className="w-3.5 h-3.5 text-zinc-600 animate-spin" />
+                                                <span className="text-xs text-zinc-600">
+                                                    Retrying... (attempt {retryCount})
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </>
                             )}
