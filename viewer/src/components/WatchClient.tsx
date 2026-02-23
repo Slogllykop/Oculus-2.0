@@ -59,13 +59,8 @@ export default function WatchClient({ sessionId }: Props) {
                 signal: abortController.signal,
             });
             const creds = await res.json();
-            iceServers = [
-                {
-                    urls: creds.urls,
-                    username: creds.username,
-                    credential: creds.credential,
-                },
-            ];
+
+            iceServers = creds.iceServers;
         } catch (err: unknown) {
             if (err instanceof Error && err.name === "AbortError") return;
             console.error("Failed to fetch ICE servers:", err);

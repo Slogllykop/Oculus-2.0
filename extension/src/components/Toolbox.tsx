@@ -192,17 +192,11 @@ export default function Toolbox() {
         const initPeer = async () => {
             let iceServers: RTCIceServer[] = [];
             try {
-                const res = await fetch("https://speed.cloudflare.com/turn-creds", {
+                const res = await fetch(`${APP_URL}/api/turn`, {
                     signal: abortController.signal,
                 });
                 const creds = await res.json();
-                iceServers = [
-                    {
-                        urls: creds.urls,
-                        username: creds.username,
-                        credential: creds.credential,
-                    },
-                ];
+                iceServers = creds.iceServers;
             } catch (err: unknown) {
                 if (err instanceof Error && err.name === "AbortError") return;
                 console.error("Failed to fetch ICE servers:", err);
