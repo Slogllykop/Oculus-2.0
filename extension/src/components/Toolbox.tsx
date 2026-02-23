@@ -448,11 +448,11 @@ export default function Toolbox() {
                     </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/4 border border-white/8">
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
                         <span className={`w-2 h-2 rounded-full ${statusColor}`} />
                         <span className="text-xs font-medium text-zinc-300">{statusLabel}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/4 border border-white/8">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08]">
                         <Users className="w-3.5 h-3.5 text-brand-400" />
                         <span className="text-xs font-medium text-zinc-300">{viewerCount}</span>
                     </div>
@@ -472,7 +472,7 @@ export default function Toolbox() {
                         />
                         {streamState !== "live" && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                                <div className="w-16 h-16 rounded-2xl bg-white/4 border border-white/8 flex items-center justify-center">
+                                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
                                     <Monitor className="w-8 h-8 text-zinc-600" />
                                 </div>
                                 <p className="text-sm text-zinc-500 text-center px-4">
@@ -510,7 +510,7 @@ export default function Toolbox() {
                                     <span className="text-xs text-brand-400">Ready</span>
                                 </div>
                             ) : (
-                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/6 backdrop-blur-sm border border-white/8">
+                                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.06] backdrop-blur-sm border border-white/[0.08]">
                                     <WifiOff className="w-3 h-3 text-zinc-500" />
                                     <span className="text-xs text-zinc-500">Connecting...</span>
                                 </div>
@@ -526,7 +526,7 @@ export default function Toolbox() {
                     )}
 
                     {shareUrl && (
-                        <div className="flex items-center gap-2 p-3 rounded-xl bg-white/3 border border-white/[0.07]">
+                        <div className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.03] border border-white/[0.07]">
                             <span className="flex-1 text-xs text-zinc-400 truncate font-mono">
                                 {shareUrl}
                             </span>
@@ -564,7 +564,7 @@ export default function Toolbox() {
                                     className={`py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                                         quality === q
                                             ? "bg-brand-600 text-white shadow-lg shadow-brand-900/30"
-                                            : "bg-white/4 border border-white/8 text-zinc-400 hover:bg-white/8 hover:text-white"
+                                            : "bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:bg-white/[0.08] hover:text-white"
                                     }`}
                                 >
                                     {q}
@@ -609,7 +609,7 @@ export default function Toolbox() {
                             className={`w-full py-2 rounded-lg text-xs font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                                 audioEnabled
                                     ? "bg-brand-600/20 border border-brand-500/30 text-brand-300 hover:bg-brand-600/30"
-                                    : "bg-white/4 border border-white/8 text-zinc-400 hover:bg-white/8 hover:text-white"
+                                    : "bg-white/[0.04] border border-white/[0.08] text-zinc-400 hover:bg-white/[0.08] hover:text-white"
                             }`}
                         >
                             {audioEnabled ? "Mute Audio" : "Unmute Audio"}
@@ -637,7 +637,7 @@ export default function Toolbox() {
                         <button
                             type="button"
                             onClick={() => startCapture(true)}
-                            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-white/4 border border-white/8 hover:bg-white/[0.07] text-zinc-300 text-xs font-medium transition-colors"
+                            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] text-zinc-300 text-xs font-medium transition-colors"
                         >
                             <RefreshCw className="w-3.5 h-3.5" />
                             Change Screen / Window

@@ -27,7 +27,7 @@ export default function WatchClient({ sessionId }: Props) {
         viewStateRef.current = s;
         setViewState(s);
     };
-    const [muted, setMuted] = useState(false);
+    const [muted, setMuted] = useState(true);
     const [errorMsg, setErrorMsg] = useState("");
     const [retryCount, setRetryCount] = useState(0);
     const [showControls, setShowControls] = useState(true);
@@ -100,13 +100,14 @@ export default function WatchClient({ sessionId }: Props) {
                 const video = videoRef.current;
                 if (video) {
                     video.srcObject = remoteStream;
-                    // Start unmuted as requested. This might require user interaction to autoplay in some browsers.
-                    video.muted = false;
+                    // Start muted to satisfy browser autoplay policy,
+                    // then play. The UI mute button lets the user unmute.
+                    video.muted = true;
                     video.play().catch((e) => {
                         console.warn("Autoplay failed:", e);
                     });
                 }
-                setMuted(false);
+                setMuted(true);
                 setViewStateSync("streaming");
             });
 
@@ -207,7 +208,7 @@ export default function WatchClient({ sessionId }: Props) {
     return (
         <div className="min-h-screen bg-black flex flex-col">
             {/* Header */}
-            <header className="flex items-center justify-between px-6 py-4 border-b border-white/6 bg-zinc-950/80 backdrop-blur-sm">
+            <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06] bg-zinc-950/80 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
                         <Monitor className="w-4 h-4 text-white" />
@@ -234,13 +235,13 @@ export default function WatchClient({ sessionId }: Props) {
                         </div>
                     )}
                     {viewState === "connecting" && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/5 border border-white/8">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.05] border border-white/[0.08]">
                             <Loader2 className="w-3 h-3 text-zinc-400 animate-spin" />
                             <span className="text-xs text-zinc-400">Connecting...</span>
                         </div>
                     )}
                     {viewState === "disconnected" && (
-                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/4 border border-white/[0.07]">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.07]">
                             <WifiOff className="w-3 h-3 text-zinc-500" />
                             <span className="text-xs text-zinc-500">Stream ended</span>
                         </div>
@@ -273,7 +274,7 @@ export default function WatchClient({ sessionId }: Props) {
                         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
                             {viewState === "connecting" && (
                                 <>
-                                    <div className="w-20 h-20 rounded-2xl bg-white/4 border border-white/8 flex items-center justify-center">
+                                    <div className="w-20 h-20 rounded-2xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center">
                                         <Loader2 className="w-8 h-8 text-brand-400 animate-spin" />
                                     </div>
                                     <div className="text-center">
@@ -316,7 +317,7 @@ export default function WatchClient({ sessionId }: Props) {
 
                             {viewState === "disconnected" && (
                                 <>
-                                    <div className="w-20 h-20 rounded-2xl bg-white/4 border border-white/[0.07] flex items-center justify-center">
+                                    <div className="w-20 h-20 rounded-2xl bg-white/[0.04] border border-white/[0.07] flex items-center justify-center">
                                         <WifiOff className="w-8 h-8 text-zinc-600" />
                                     </div>
                                     <div className="text-center">
@@ -327,7 +328,7 @@ export default function WatchClient({ sessionId }: Props) {
                                         <button
                                             type="button"
                                             onClick={retry}
-                                            className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/4 border border-white/8 text-zinc-300 text-sm hover:bg-white/[0.07] transition-colors mx-auto"
+                                            className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.04] border border-white/[0.08] text-zinc-300 text-sm hover:bg-white/[0.07] transition-colors mx-auto"
                                         >
                                             <RefreshCw className="w-3.5 h-3.5" />
                                             Try reconnecting
@@ -377,7 +378,7 @@ export default function WatchClient({ sessionId }: Props) {
                                         : "opacity-0 translate-y-2"
                                 }`}
                             >
-                                <div className="bg-linear-to-t from-black/90 to-transparent p-4 flex items-center justify-between">
+                                <div className="bg-gradient-to-t from-black/90 to-transparent p-4 flex items-center justify-between">
                                     <button
                                         type="button"
                                         onClick={toggleMute}
@@ -405,7 +406,7 @@ export default function WatchClient({ sessionId }: Props) {
                 </div>
 
                 {/* Info bar */}
-                <div className="w-full max-w-6xl flex items-center justify-between px-4 py-3 rounded-xl bg-white/2 border border-white/6">
+                <div className="w-full max-w-6xl flex items-center justify-between px-4 py-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                     <div className="flex items-center gap-2">
                         {viewState === "streaming" ? (
                             <Wifi className="w-4 h-4 text-brand-400" />
