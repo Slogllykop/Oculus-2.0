@@ -399,7 +399,7 @@ export default function Toolbox() {
         if (audioTracks.length === 0 || silentTrackRef.current) {
             // Only silent placeholder - can't enable real audio without re-sharing
             setError(
-                "No system audio captured. Re-share your screen and enable 'Share system audio'.",
+                "No tab audio captured. Re-share your screen and enable 'Also share tab audio'.",
             );
             return;
         }
@@ -484,15 +484,13 @@ export default function Toolbox() {
                                             ? error
                                             : "No preview available"}
                                 </p>
-                                {(streamState === "error" || streamState === "idle") && (
+                                {streamState === "error" && (
                                     <button
                                         type="button"
                                         onClick={() => startCapture(false)}
                                         className="px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-xs font-medium transition-colors"
                                     >
-                                        {streamState === "error"
-                                            ? "Retry Capture"
-                                            : "Start Capture"}
+                                        Retry Capture
                                     </button>
                                 )}
                             </div>
@@ -585,7 +583,7 @@ export default function Toolbox() {
                         </div>
                     </div>
 
-                    {/* System Audio */}
+                    {/* Tab Audio */}
                     <div className="rounded-2xl bg-zinc-950 border border-white/[0.07] p-4 space-y-3">
                         <div className="flex items-center gap-2">
                             {audioEnabled ? (
@@ -593,13 +591,13 @@ export default function Toolbox() {
                             ) : (
                                 <VolumeX className="w-4 h-4 text-zinc-500" />
                             )}
-                            <h3 className="text-sm font-semibold text-white">System Audio</h3>
+                            <h3 className="text-sm font-semibold text-white">Tab Audio</h3>
                         </div>
                         <p className="text-xs text-zinc-500 leading-relaxed">
                             {audioEnabled
-                                ? "Desktop audio is live - viewers can hear it."
+                                ? "Tab audio is live - viewers can hear it."
                                 : silentTrackRef.current
-                                  ? "No system audio captured. Re-share screen & enable 'Share system audio'."
+                                  ? "No tab audio captured. Re-share screen & enable 'Also share tab audio'."
                                   : "No audio source active."}
                         </p>
                         <button
@@ -614,10 +612,15 @@ export default function Toolbox() {
                         >
                             {audioEnabled ? "Mute Audio" : "Unmute Audio"}
                         </button>
-                        <p className="text-[10px] text-zinc-700 leading-relaxed">
-                            Enable &quot;Share system audio&quot; in the browser screen picker to
-                            share desktop sound.
-                        </p>
+                        <div className="text-[10px] text-zinc-700 leading-relaxed space-y-1">
+                            <p>
+                                Enable &quot;Also share tab audio&quot; in the browser screen picker
+                                to share tab sound.
+                            </p>
+                            <p className="text-yellow-500/80">
+                                Note: Audio sharing only works while sharing browser tabs.
+                            </p>
+                        </div>
                     </div>
 
                     {/* Viewer Count */}
