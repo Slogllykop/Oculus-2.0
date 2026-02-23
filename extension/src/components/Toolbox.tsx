@@ -241,14 +241,18 @@ export default function Toolbox() {
 					// 	username: "0ec1be57ed8f94ea397c6826",
 					// 	credential: "bb3JZ7XOD+uXJwkz",
 					// },
-					{ urls: "stun:stun.l.google.com:19302" },
-					{ urls: "stun:stun1.l.google.com:19302" },
-					{ urls: "stun:stun2.l.google.com:19302" },
-					{ urls: "stun:stun3.l.google.com:19302" },
-					{ urls: "stun:stun4.l.google.com:19302" },
-					{ urls: "stun:global.stun.twilio.com:3478" },
-					{ urls: "stun:stun.nextcloud.com:443" },
-					{ urls: "stun:stun.cloudflare.com:3478" },
+					{
+						urls: [
+							"stun:stun.cloudflare.com:3478",
+							"turn:turn.cloudflare.com:3478?transport=udp",
+							"turn:turn.cloudflare.com:3478?transport=tcp",
+							"turns:turn.cloudflare.com:5349?transport=tcp",
+						],
+						username:
+							"g06c9524e17a4e6e656c4224db8fe4068e5c5058de9f77ce60957dd0b7b3d0a9",
+						credential:
+							"0a6598f2f68fe26b638de7edfaa5bb1877c0241a37011c8b9d24f85a247930ce",
+					},
 				],
 				iceCandidatePoolSize: 10,
 			},
