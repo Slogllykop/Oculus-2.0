@@ -79,7 +79,7 @@ export function StreamOverlay({ viewState, errorMsg, retryCount, onRetry }: Stre
                         <button
                             type="button"
                             onClick={onRetry}
-                            className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/6 border border-white/8 text-zinc-300 text-sm hover:bg-white/[0.1] transition-colors mx-auto cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue"
+                            className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/6 border border-white/8 text-zinc-300 text-sm hover:bg-white/10 transition-colors mx-auto cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue"
                         >
                             <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
                             Try reconnecting

@@ -1,128 +1,167 @@
-# 🔭 Oculus - Peer-to-Peer Screen Sharing
+<div align="center">
 
-A modern, dark-mode P2P screen sharing app consisting of:
-- **`extension/`** - Chrome extension (broadcaster)
-- **`viewer/`** - Next.js website (viewer)
+# 🔭 Oculus Screen Share
 
----
+**A lightning-fast, modern, peer-to-peer screen sharing application built for privacy and performance.**
 
-## Architecture
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+[![styled with Tailwind](https://img.shields.io/badge/styled_with-Tailwind_CSS-38bdf8.svg)](https://tailwindcss.com)
+[![Linted with Biome](https://img.shields.io/badge/Linted_with-Biome-60A5FA.svg)](https://biomejs.dev/)
 
-```
-Broadcaster (Chrome Extension)
-  └── Captures screen via getDisplayMedia
-  └── Creates PeerJS peer with ID: oculus-{sessionId}
-  └── Answers incoming calls with MediaStream
-  └── Opens toolbox tab (stays alive even when popup closes)
+[Features](#-features) • [Architecture](#-architecture) • [Getting Started](#-getting-started) • [Contributing](#-contributing)
 
-Viewer (Next.js website)
-  └── Visits /watch/{sessionId}
-  └── Creates anonymous PeerJS peer
-  └── Calls oculus-{sessionId} to receive MediaStream
-  └── Plays stream in <video> element
-```
+</div>
 
 ---
 
-## Getting Started
+## 📖 Overview
 
-### 1. Viewer Website
+**Oculus** is an open-source, peer-to-peer screen sharing ecosystem. It bypasses the need for expensive middle-man servers by connecting the broadcaster directly to the viewer securely using WebRTC. 
+
+The project is split into two primary components:
+1. **The Broadcaster (Chrome Extension)**: Captures your screen and creates a secure P2P stream.
+2. **The Viewer (Next.js Application)**: A modern, accessible web interface to consume the stream without requiring any plugins or extensions.
+
+## ✨ Features
+
+### 📡 Broadcaster (Chrome Extension)
+- **One-Click Share:** Generate a secure, unique viewing link instantly effortlessly.
+- **Persistent Toolbox:** The broadcast controls remain accessible and alive safely in a background tab even if you close the extension popup.
+- **Stream Controls:**
+  - Dynamic visual quality adjustments: `1080p` / `720p` / `480p` / `360p`
+  - Instant Audio and Microphone toggle support
+  - Live viewer count analytics
+  - Picture-in-Picture stream preview
+  - Hassle-free screen/window switching
+
+### 🖥️ Viewer Experience (Next.js Web App)
+- **Frictionless Access:** Zero installations required for viewers. Works via a simple browser URL.
+- **Auto-Connect:** Robust P2P handshake protocol via PeerJS that automatically retries connection until the broadcaster goes live.
+- **Immersive:** Dedicated Theater/Full-screen mode, responsive dark mode design.
+
+---
+
+## 🏗️ Repository Structure
+
+This repository uses [pnpm workspaces](https://pnpm.io/workspaces) to manage a monolithic structure smoothly.
+
+```text
+Oculus/
+├── extension/          # Chrome Extension source code (Vite + React)
+├── viewer/             # Viewer Web Client source code (Next.js)
+├── biome.json          # Unified linting/formatting configuration
+├── package.json        # Workspace configuration
+└── pnpm-workspace.yaml # pnpm structure definition
+```
+
+## 🛠️ Tech Stack
+
+- **Monorepo Manager:** `pnpm` workspaces
+- **Broadcaster (Extension):** React 19, Vite, Tailwind CSS v4, `@crxjs/vite-plugin`
+- **Viewer (Web App):** Next.js 15, React 19, Tailwind CSS v4, TypeScript
+- **P2P Networking:** [PeerJS](https://peerjs.com/) (WebRTC wrapper)
+- **Code Quality:** [Biome](https://biomejs.dev/) (Linting & Formatting)
+
+---
+
+## 📐 Architecture summary
+
+Rather than routing your screen data through a centralized server, Oculus bridges you directly to your peers:
+
+1. **Initiation:** The broadcaster clicks **Start Sharing** in the Chrome extension.
+2. **Signaling:** A unique session ID is generated. The extension registers as a PeerJS peer (e.g., `oculus-{sessionId}`).
+3. **Capture:** The browser's native `getDisplayMedia()` safely captures the selected screen/window.
+4. **Handshake:** The viewer navigates to the generated URL (e.g., `viewer.com/watch/{sessionId}`) and automatically attempts to call the broadcaster's peer ID.
+5. **Streaming:** The broadcaster answers with a `MediaStream`. Video and audio flow directly via WebRTC infrastructure.
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [pnpm](https://pnpm.io/) (v8 or higher)
+- A Chromium-based browser (Chrome, Edge, Brave, etc.)
+
+### 1. Installation
+
+Clone the repository and install dependencies at the root to leverage the pnpm workspace:
+
+```bash
+git clone https://github.com/your-username/Oculus.git
+cd Oculus
+pnpm install
+```
+
+### 2. Viewer Website (Development)
+
+Run the Next.js application locally for your viewers:
 
 ```bash
 cd viewer
-npm install
-npm run dev        # http://localhost:3000
+pnpm run dev
 ```
 
-For production, deploy to Vercel:
-```bash
-cd viewer
-npx vercel
-```
-Then update `VIEWER_BASE_URL` in both:
-- `extension/src/App.tsx`
-- `extension/src/components/Toolbox.tsx`
+The viewer will be available at `http://localhost:3000`.
 
-### 2. Chrome Extension
+### 3. Chrome Extension (Development & Build)
+
+Build the extension to be loaded into your browser:
 
 ```bash
 cd extension
-npm install
-npm run build      # outputs to extension/dist/
+# To build once:
+pnpm run build
+# Or to watch for changes during development:
+pnpm run build:watch 
 ```
 
-**Load in Chrome:**
-1. Open `chrome://extensions`
-2. Enable **Developer Mode**
-3. Click **Load unpacked**
-4. Select the `extension/dist/` folder
+**Load the unpacked extension in Chrome:**
+1. Navigate to `chrome://extensions` in your address bar.
+2. Toggle **Developer Mode** on (top right).
+3. Click **Load unpacked**.
+4. Select the `extension/dist/` directory.
 
 ---
 
-## Features
+## 🌍 Deployment Notes
 
-### Extension (Broadcaster)
-- **Popup** - Click "Start Sharing" to generate a unique share URL
-- **Toolbox Tab** - Full control panel that stays alive when popup is closed:
-  - Quality selector: 1080p / 720p / 480p / 360p
-  - Audio toggle (mic on/off)
-  - Live viewer count
-  - Stop broadcast button
-  - Change screen button
-  - Live preview of your stream
-
-### Viewer Website
-- Auto-connects to broadcaster via P2P (PeerJS)
-- Retries automatically until broadcaster goes live
-- Full-screen support
-- Mute toggle
-- Works on any device, any browser
+1. **Deploying the Viewer:** The `viewer` folder is a standard Next.js application. It can be effortlessly deployed directly to [Vercel](https://vercel.com/), Netlify, or self-hosted via a Node server.
+2. **Updating API References:** After deploying the viewer, locate the `VIEWER_BASE_URL` constant within the extension's codebase (e.g., `App.tsx` and `Toolbox.tsx`) and update it to point to your new live URL. Rebuild the extension.
+3. **Hosting your own signaling server:** Oculus uses the Cloudflare's Realtime TURN servers which is limited to 1000Gb/month of bandwidth. Create your own credentials and put them into `.env.local` file
 
 ---
 
-## Tech Stack
+## 🤝 Contributing
 
-| Part | Stack |
-|------|-------|
-| Extension | React 18, Vite, Tailwind CSS, PeerJS, Biome |
-| Viewer | Next.js 15, Tailwind CSS, PeerJS, TypeScript |
-| Streaming | PeerJS (WebRTC peer-to-peer) |
-| Signaling | PeerJS Cloud (0.peerjs.com) |
+We love our contributors! If you're a developer looking to improve **Oculus**, please feel free to fork this project. Here's a quick guide:
 
----
+1. **Fork the repository** to your own GitHub account.
+2. **Create a new branch** for your feature or bug fix:
+   ```bash
+   git checkout -b feature/my-new-feature
+   ```
+3. **Make your changes**. Ensure your code conforms to the project's standards by running `pnpm run lint` and `pnpm run format` (using Biome) at the root level.
+4. **Commit your changes**:
+   ```bash
+   git commit -m "feat: Describe your feature"
+   ```
+5. **Push to your branch**:
+   ```bash
+   git push origin feature/my-new-feature
+   ```
+6. **Open a Pull Request** against the `main` branch.
 
-## Development
-
-### Extension dev mode
-```bash
-cd extension
-npm run build:watch   # auto-rebuilds on change
-```
-Reload the extension in Chrome after each build.
-
-### Viewer dev mode
-```bash
-cd viewer
-npm run dev
-```
+Please ensure you've tested both the viewer and the extension simultaneously before submitting large PRs.
 
 ---
 
-## Deployment Notes
+## 🛡️ License
 
-- The viewer can be deployed to **Vercel**, **Netlify**, or any Node.js host
-- After deploying, update the `VIEWER_BASE_URL` constant in the extension source files and rebuild
-- PeerJS uses the free public signaling server by default - for production use, consider [self-hosting PeerJS server](https://github.com/peers/peerjs-server)
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-## How it Works
-
-1. Broadcaster clicks **Start Sharing** in the Chrome extension popup
-2. A unique session ID (`uuid`) is generated
-3. The toolbox tab opens and registers as a PeerJS peer: `oculus-{sessionId}`
-4. `getDisplayMedia()` captures the screen
-5. A shareable URL is generated: `https://your-viewer.com/watch/{sessionId}`
-6. When a viewer opens the URL, they create a PeerJS connection and call the broadcaster peer
-7. The broadcaster answers with the `MediaStream` - video streams P2P!
-8. The extension popup can be closed - the toolbox tab keeps streaming
+<div align="center">
+  <b>Built with ❤️ by Slogllykop and Oculus Community</b>
+</div>

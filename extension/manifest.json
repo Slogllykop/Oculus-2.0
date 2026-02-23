@@ -1,10 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Oculus Screen Share",
-    "version": "2.0.0",
-    "description": "Simple peer-to-peer screen sharing",
-    "permissions": ["tabs", "activeTab", "scripting", "storage"],
-    "host_permissions": ["<all_urls>"],
+    "name": "Oculus: Screen Share",
+    "version": "2.0.1",
+    "description": "Lightning fast and secure peer to peer screen sharing directly from your browser.",
     "action": {
         "default_popup": "index.html",
         "default_icon": {

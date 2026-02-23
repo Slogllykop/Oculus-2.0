@@ -17,14 +17,67 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Oculus – Screen Sharing, Right in Your Browser",
+    title: {
+        default: "Oculus | Free Peer-to-Peer Screen Sharing in Your Browser",
+        template: "%s | Oculus Screen Share",
+    },
     description:
-        "Instant, peer-to-peer screen sharing that lives in your browser. No downloads, no accounts, no servers — just share and watch.",
+        "Experience lightning-fast, secure, and free peer-to-peer screen sharing directly from your browser. No downloads, no sign-ups, and no servers required. Share your screen instantly with WebRTC.",
+    keywords: [
+        "screen sharing",
+        "peer-to-peer",
+        "P2P",
+        "WebRTC",
+        "browser screen share",
+        "free screen sharing",
+        "no download screen share",
+        "secure screen sharing",
+        "instant screen share",
+        "online presentation",
+        "remote collaboration",
+    ],
+    authors: [{ name: "Slogllykop" }, { name: "Oculus Community" }],
+    creator: "Slogllykop",
+    publisher: "Oculus",
+    formatDetection: {
+        email: false,
+        address: false,
+        telephone: false,
+    },
     openGraph: {
-        title: "Oculus – Screen Sharing, Right in Your Browser",
+        title: "Oculus | Free Peer-to-Peer Screen Sharing",
         description:
-            "Instant, peer-to-peer screen sharing that lives in your browser. No downloads, no accounts, no servers.",
+            "Share your screen instantly with zero friction. Oculus is a secure, P2P screen sharing tool that works entirely in your browser without downloads or sign-ups.",
+        siteName: "Oculus Screen Share",
+        locale: "en_US",
         type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Oculus | Free Peer-to-Peer Screen Sharing",
+        description:
+            "Share your screen instantly with zero friction. Oculus is a secure, P2P screen sharing tool that works entirely in your browser.",
+    },
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+        },
+    },
+    category: "technology",
+    icons: {
+        icon: "/icon500.png",
+        shortcut: "/icon500.png",
+        apple: "/icon500.png",
+        other: {
+            rel: "apple-touch-icon-precomposed",
+            url: "/icon500.png",
+        },
     },
 };
 

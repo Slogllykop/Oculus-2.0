@@ -136,7 +136,7 @@
 
 @layer components {
     .glass {
-        @apply bg-white/[0.03] backdrop-blur-[12px] border border-white/[0.07];
+        @apply bg-white/3 backdrop-blur-md border border-white/[0.07];
     }
     .glass-surface {
         @apply bg-surface-2 border border-white/[0.07];

@@ -25,7 +25,7 @@ export function AudioPanel({
             </div>
             <p className="text-xs text-zinc-400 leading-relaxed font-medium">
                 {audioEnabled
-                    ? "Tab audio is live — viewers can hear it."
+                    ? "Tab audio is live - viewers can hear it."
                     : hasSilentPlaceholder
                       ? "No tab audio captured. Re-share screen & enable 'Also share tab audio'."
                       : "No audio source active."}

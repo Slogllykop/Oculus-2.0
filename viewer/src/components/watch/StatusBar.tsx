@@ -9,7 +9,7 @@ interface StatusBarProps {
 
 /** Human-readable status message labels */
 const STATUS_MESSAGES: Record<ViewState, string> = {
-    streaming: "Stream connected — watching live",
+    streaming: "Stream connected - watching live",
     waiting: "Waiting for broadcast to start…",
     connecting: "Establishing connection…",
     disconnected: "Stream has ended",

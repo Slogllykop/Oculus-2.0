@@ -15,7 +15,7 @@ const FEATURES = [
     {
         icon: Zap,
         title: "Instant Sharing",
-        desc: "One click to start. Get a shareable URL immediately — no sign-up, no installation prompts.",
+        desc: "One click to start. Get a shareable URL immediately - no sign-up, no installation prompts.",
         color: "amber",
     },
     {
@@ -27,7 +27,7 @@ const FEATURES = [
     {
         icon: Shield,
         title: "Private by Default",
-        desc: "Direct peer-to-peer connections. No servers see your screen — only people with your link.",
+        desc: "Direct peer-to-peer connections. No servers see your screen - only people with your link.",
         color: "green",
     },
     {
@@ -132,7 +132,7 @@ export default function Home() {
 
             {/* ─── Hero ─────────────────────────────────────────── */}
             <section className="flex-1 flex flex-col items-center justify-center px-6 pt-24 pbbg-accent-violet/4e">
-                {/* Background orbs — multi-color */}
+                {/* Background orbs - multi-color */}
                 <div
                     className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-accent-blue/4 blur-[150px] pointer-events-none animate-float"
                     aria-hidden="true"
@@ -452,7 +452,7 @@ export default function Home() {
                         className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-white text-black font-bold text-base transition-all shadow-[0_0_40px_rgba(59,130,246,0.12)] hover:shadow-[0_0_60px_rgba(59,130,246,0.2)] hover:scale-[1.03] active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
                         <Chrome className="w-5 h-5" aria-hidden="true" />
-                        Install Oculus — It&apos;s Free
+                        Install Oculus - It&apos;s Free
                         <ArrowRight className="w-4 h-4" aria-hidden="true" />
                     </a>
                 </div>
