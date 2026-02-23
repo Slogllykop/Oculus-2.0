@@ -147,7 +147,7 @@ export default function Home() {
                     aria-hidden="true"
                 />
 
-                <div className="relative space-y-8 max-w-4xl">
+                <div className="relative space-y-8 max-w-4xl flex flex-col items-center">
                     {/* Badge */}
                     <div
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/8 text-zinc-400 text-xs font-medium animate-fade-in"
