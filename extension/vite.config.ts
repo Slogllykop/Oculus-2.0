@@ -23,5 +23,10 @@ export default defineConfig({
     build: {
         outDir: "dist",
         emptyOutDir: true,
+        rollupOptions: {
+            input: {
+                toolbox: path.resolve(__dirname, "toolbox.html"),
+            },
+        },
     },
 });

@@ -53,10 +53,21 @@ export default function Toolbox() {
     }, [capture.startCapture]);
 
     return (
-        <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col">
+        <div className="min-h-screen bg-surface-0 text-white font-sans flex flex-col relative overflow-hidden">
+            {/* Background orbs */}
+            <div
+                className="absolute top-0 -left-1/4 w-[500px] h-[500px] rounded-full bg-accent-blue/4 blur-[150px] pointer-events-none animate-float"
+                aria-hidden="true"
+            />
+            <div
+                className="absolute bottom-0 -right-1/4 w-[500px] h-[500px] rounded-full bg-accent-violet/4 blur-[150px] pointer-events-none animate-float"
+                style={{ animationDelay: "2s" }}
+                aria-hidden="true"
+            />
+
             <ToolboxHeader streamState={capture.streamState} viewerCount={peer.viewerCount} />
 
-            <div className="flex flex-1 gap-6 p-6 max-w-5xl mx-auto w-full">
+            <div className="flex flex-1 gap-6 p-6 max-w-5xl mx-auto w-full relative z-10 animate-fade-in">
                 {/* Preview Column */}
                 <div className="flex-1 flex flex-col gap-4">
                     <StreamPreview
@@ -68,7 +79,7 @@ export default function Toolbox() {
                     />
 
                     {capture.error && (
-                        <div className="flex items-start gap-2 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-300 text-xs">
+                        <div className="flex items-start gap-2 p-3 rounded-xl bg-accent-amber/10 border border-accent-amber/20 text-accent-amber-light text-xs">
                             <span className="mt-0.5" aria-hidden="true">
                                 ⚠
                             </span>
@@ -101,10 +112,10 @@ export default function Toolbox() {
                             type="button"
                             onClick={() => capture.startCapture(true)}
                             aria-label="Change shared screen or window"
-                            className="flex items-center justify-center gap-2 py-2.5 px-4 rounded-2xl bg-white/4 border border-white/8 hover:bg-white/[0.07] text-zinc-300 text-xs font-medium transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-surface-2 border border-white/5 hover:border-white/10 text-zinc-400 hover:text-white font-bold text-xs uppercase tracking-wide transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-white/50 shadow-sm hover:shadow-xl"
                         >
                             <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
-                            Change Screen / Window
+                            Change Screen
                         </button>
                     )}
 
@@ -113,10 +124,13 @@ export default function Toolbox() {
                         onClick={capture.stopStream}
                         disabled={capture.streamState === "stopped"}
                         aria-label="Stop broadcasting"
-                        className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-semibold text-sm transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                        className="group flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-surface-2 border border-white/5 hover:border-accent-red/30 hover:bg-accent-red/10 text-zinc-400 hover:text-accent-red-light font-bold text-xs uppercase tracking-wide transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent-red shadow-sm hover:shadow-xl"
                     >
-                        <Square className="w-4 h-4 fill-red-400" aria-hidden="true" />
-                        Stop Broadcasting
+                        <Square
+                            className="w-3 h-3 fill-zinc-600 group-hover:fill-accent-red transition-colors"
+                            aria-hidden="true"
+                        />
+                        Stop Broadcast
                     </button>
                 </div>
             </div>

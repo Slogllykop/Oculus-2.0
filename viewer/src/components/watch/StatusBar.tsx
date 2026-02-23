@@ -9,7 +9,7 @@ interface StatusBarProps {
 
 /** Human-readable status message labels */
 const STATUS_MESSAGES: Record<ViewState, string> = {
-    streaming: "Stream connected - watching live",
+    streaming: "Stream connected — watching live",
     waiting: "Waiting for broadcast to start…",
     connecting: "Establishing connection…",
     disconnected: "Stream has ended",
@@ -19,10 +19,10 @@ const STATUS_MESSAGES: Record<ViewState, string> = {
 /** Info bar showing connection status text and P2P badge. */
 export function StatusBar({ viewState }: StatusBarProps) {
     return (
-        <div className="w-full max-w-6xl flex items-center justify-between px-4 py-3 rounded-xl bg-white/2 border border-white/6">
+        <div className="w-full max-w-6xl flex items-center justify-between px-4 py-3 rounded-xl bg-surface-2 border border-white/6">
             <div className="flex items-center gap-2">
                 {viewState === "streaming" ? (
-                    <Wifi className="w-4 h-4 text-brand-400" aria-hidden="true" />
+                    <Wifi className="w-4 h-4 text-accent-green" aria-hidden="true" />
                 ) : (
                     <WifiOff className="w-4 h-4 text-zinc-600" aria-hidden="true" />
                 )}

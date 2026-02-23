@@ -19,7 +19,7 @@ export function StreamControls({
     return (
         <>
             {/* LIVE badge */}
-            <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/90 backdrop-blur-sm">
+            <div className="absolute top-4 left-4 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-accent-red/90 backdrop-blur-sm">
                 <span
                     className="w-1.5 h-1.5 rounded-full bg-white animate-pulse"
                     aria-hidden="true"
@@ -38,7 +38,7 @@ export function StreamControls({
                         type="button"
                         onClick={onToggleMute}
                         aria-label={muted ? "Unmute audio" : "Mute audio"}
-                        className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm border border-white/10 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400"
+                        className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm border border-white/10 cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue"
                     >
                         {muted ? (
                             <VolumeX className="w-5 h-5" aria-hidden="true" />
@@ -50,7 +50,7 @@ export function StreamControls({
                         type="button"
                         onClick={onToggleFullscreen}
                         aria-label="Toggle fullscreen"
-                        className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm border border-white/10 cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400"
+                        className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors backdrop-blur-sm border border-white/10 cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue"
                     >
                         <Maximize2 className="w-5 h-5" aria-hidden="true" />
                     </button>

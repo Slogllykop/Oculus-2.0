@@ -18,9 +18,9 @@ export function StreamOverlay({ viewState, errorMsg, retryCount, onRetry }: Stre
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-5">
             {viewState === "connecting" && (
                 <>
-                    <div className="w-20 h-20 rounded-2xl bg-white/4 border border-white/8 flex items-center justify-center">
+                    <div className="w-20 h-20 rounded-2xl bg-accent-blue/10 border border-accent-blue/20 flex items-center justify-center">
                         <Loader2
-                            className="w-8 h-8 text-brand-400 animate-spin"
+                            className="w-8 h-8 text-accent-blue animate-spin"
                             aria-hidden="true"
                         />
                     </div>
@@ -34,15 +34,15 @@ export function StreamOverlay({ viewState, errorMsg, retryCount, onRetry }: Stre
             {viewState === "waiting" && (
                 <>
                     <div className="relative">
-                        <div className="w-20 h-20 rounded-2xl bg-brand-500/10 border border-brand-500/20 flex items-center justify-center">
-                            <Radio className="w-8 h-8 text-brand-400" aria-hidden="true" />
+                        <div className="w-20 h-20 rounded-2xl bg-accent-green/10 border border-accent-green/20 flex items-center justify-center">
+                            <Radio className="w-8 h-8 text-accent-green" aria-hidden="true" />
                         </div>
                         <span
-                            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-brand-400 animate-ping opacity-75"
+                            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent-green animate-ping opacity-75"
                             aria-hidden="true"
                         />
                         <span
-                            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-brand-400"
+                            className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent-green"
                             aria-hidden="true"
                         />
                     </div>
@@ -79,7 +79,7 @@ export function StreamOverlay({ viewState, errorMsg, retryCount, onRetry }: Stre
                         <button
                             type="button"
                             onClick={onRetry}
-                            className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/4 border border-white/8 text-zinc-300 text-sm hover:bg-white/[0.07] transition-colors mx-auto cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/6 border border-white/8 text-zinc-300 text-sm hover:bg-white/[0.1] transition-colors mx-auto cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue"
                         >
                             <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
                             Try reconnecting
@@ -90,8 +90,8 @@ export function StreamOverlay({ viewState, errorMsg, retryCount, onRetry }: Stre
 
             {viewState === "error" && (
                 <>
-                    <div className="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                        <AlertCircle className="w-8 h-8 text-red-400" aria-hidden="true" />
+                    <div className="w-20 h-20 rounded-2xl bg-accent-red/10 border border-accent-red/20 flex items-center justify-center">
+                        <AlertCircle className="w-8 h-8 text-accent-red" aria-hidden="true" />
                     </div>
                     <div className="text-center">
                         <p className="text-white font-semibold">Connection failed</p>
@@ -101,7 +101,7 @@ export function StreamOverlay({ viewState, errorMsg, retryCount, onRetry }: Stre
                         <button
                             type="button"
                             onClick={onRetry}
-                            className="mt-4 flex items-center gap-2 px-4 py-2 rounded-lg bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium transition-colors mx-auto cursor-pointer focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
+                            className="mt-4 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black text-sm font-semibold transition-all mx-auto cursor-pointer hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-accent-blue"
                         >
                             <RefreshCw className="w-3.5 h-3.5" aria-hidden="true" />
                             Retry

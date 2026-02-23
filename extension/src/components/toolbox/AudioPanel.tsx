@@ -7,7 +7,6 @@ interface AudioPanelProps {
     onToggleAudio: () => void;
 }
 
-/** Tab audio controls with mute/unmute toggle and guidance text. */
 export function AudioPanel({
     audioEnabled,
     hasSilentPlaceholder,
@@ -15,18 +14,18 @@ export function AudioPanel({
     onToggleAudio,
 }: AudioPanelProps) {
     return (
-        <div className="rounded-2xl bg-zinc-950 border border-white/[0.07] p-4 space-y-3">
+        <div className="rounded-2xl bg-surface-2 border border-white/5 p-4 space-y-4 transition-colors hover:border-white/10">
             <div className="flex items-center gap-2">
                 {audioEnabled ? (
-                    <Volume2 className="w-4 h-4 text-brand-400" aria-hidden="true" />
+                    <Volume2 className="w-4 h-4 text-white" aria-hidden="true" />
                 ) : (
                     <VolumeX className="w-4 h-4 text-zinc-500" aria-hidden="true" />
                 )}
-                <h3 className="text-sm font-semibold text-white">Tab Audio</h3>
+                <h3 className="text-sm font-semibold text-white tracking-wide">Tab Audio</h3>
             </div>
-            <p className="text-xs text-zinc-500 leading-relaxed">
+            <p className="text-xs text-zinc-400 leading-relaxed font-medium">
                 {audioEnabled
-                    ? "Tab audio is live - viewers can hear it."
+                    ? "Tab audio is live — viewers can hear it."
                     : hasSilentPlaceholder
                       ? "No tab audio captured. Re-share screen & enable 'Also share tab audio'."
                       : "No audio source active."}
@@ -36,21 +35,18 @@ export function AudioPanel({
                 onClick={onToggleAudio}
                 disabled={!hasOutStream || hasSilentPlaceholder}
                 aria-label={audioEnabled ? "Mute tab audio" : "Unmute tab audio"}
-                className={`w-full py-2 rounded-lg text-xs font-medium transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-black ${
+                className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed focus-visible:ring-2 focus-visible:ring-white/50 ${
                     audioEnabled
-                        ? "bg-brand-600/20 border border-brand-500/30 text-brand-300 hover:bg-brand-600/30"
-                        : "bg-white/4 border border-white/8 text-zinc-400 hover:bg-white/8 hover:text-white"
+                        ? "bg-white/10 border border-white/10 text-white hover:bg-white/20"
+                        : "bg-white/5 border border-white/5 text-zinc-400 hover:bg-white/10 hover:text-white"
                 }`}
             >
                 {audioEnabled ? "Mute Audio" : "Unmute Audio"}
             </button>
-            <div className="text-[10px] text-zinc-700 leading-relaxed space-y-1">
+            <div className="text-[10px] text-zinc-500 leading-relaxed space-y-1 font-medium">
                 <p>
                     Enable &quot;Also share tab audio&quot; in the browser screen picker to share
                     tab sound.
-                </p>
-                <p className="text-yellow-500/80">
-                    Note: Audio sharing only works while sharing browser tabs.
                 </p>
             </div>
         </div>

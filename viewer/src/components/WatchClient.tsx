@@ -33,14 +33,25 @@ export default function WatchClient({ sessionId }: Props) {
     }, []);
 
     return (
-        <div className="min-h-screen bg-black flex flex-col">
+        <div className="min-h-screen bg-surface-0 flex flex-col relative overflow-hidden">
+            {/* Background orbs to match landing page */}
+            <div
+                className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-accent-blue/4 blur-[150px] pointer-events-none animate-float"
+                aria-hidden="true"
+            />
+            <div
+                className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-accent-violet/4 blur-[130px] pointer-events-none animate-float"
+                style={{ animationDelay: "2s" }}
+                aria-hidden="true"
+            />
+
             <ViewerHeader sessionId={sessionId} viewState={viewState} />
 
-            <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 gap-6">
+            <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-8 gap-6 relative z-10">
                 {/* Video Container */}
                 <div
                     ref={containerRef}
-                    className="relative w-full max-w-6xl rounded-2xl overflow-hidden bg-zinc-950 border border-white/[0.07] shadow-2xl shadow-black/80 aspect-video"
+                    className="relative w-full max-w-6xl rounded-2xl overflow-hidden bg-surface-1 border border-white/[0.07] shadow-2xl shadow-black/80 aspect-video"
                     style={{
                         cursor: showControls || viewState !== "streaming" ? "default" : "none",
                     }}
