@@ -2,7 +2,8 @@ import type { Quality, QualityConfig, StreamState } from "@/types";
 
 /** Base URL for the viewer web app */
 // export const APP_URL = "https://oculus-2-0-viewer.vercel.app";
-export const APP_URL = "http://localhost:3000";
+export const APP_URL = "https://oculus.isdevs.cv";
+// export const APP_URL = "http://localhost:3000";
 
 /** Viewer page base URL (alias for APP_URL) */
 export const VIEWER_BASE_URL = APP_URL;
