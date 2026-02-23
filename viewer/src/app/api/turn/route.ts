@@ -14,6 +14,7 @@ export async function GET() {
     try {
         const turnTokenId = process.env.TURN_TOKEN_ID;
         const apiToken = process.env.API_TOKEN;
+        const HOURS = 5;
 
         const response = await fetch(
             `https://rtc.live.cloudflare.com/v1/turn/keys/${turnTokenId}/credentials/generate-ice-servers`,
@@ -23,7 +24,7 @@ export async function GET() {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${apiToken}`,
                 },
-                body: JSON.stringify({ ttl: 86400 }),
+                body: JSON.stringify({ ttl: HOURS * 60 * 60 }),
                 cache: "no-store",
             },
         );
