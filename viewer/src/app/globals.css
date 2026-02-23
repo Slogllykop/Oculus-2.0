@@ -1,65 +1,80 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand colours (teal palette) */
-  --color-brand-50:  #f0fdfa;
-  --color-brand-100: #ccfbf1;
-  --color-brand-200: #99f6e4;
-  --color-brand-300: #5eead4;
-  --color-brand-400: #2dd4bf;
-  --color-brand-500: #14b8a6;
-  --color-brand-600: #0d9488;
-  --color-brand-700: #0f766e;
-  --color-brand-800: #115e59;
-  --color-brand-900: #134e4a;
+    /* Brand colours (teal palette) */
+    --color-brand-50: #f0fdfa;
+    --color-brand-100: #ccfbf1;
+    --color-brand-200: #99f6e4;
+    --color-brand-300: #5eead4;
+    --color-brand-400: #2dd4bf;
+    --color-brand-500: #14b8a6;
+    --color-brand-600: #0d9488;
+    --color-brand-700: #0f766e;
+    --color-brand-800: #115e59;
+    --color-brand-900: #134e4a;
 
-  /* Font family */
-  --font-sans: Inter, system-ui, sans-serif;
+    /* Font family */
+    --font-sans: Inter, system-ui, sans-serif;
 
-  /* Custom animations */
-  --animate-pulse-slow: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-fade-in: fade-in 0.5s ease-in-out;
-  --animate-slide-up: slide-up 0.4s ease-out;
+    /* Custom animations */
+    --animate-pulse-slow: pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-fade-in: fade-in 0.5s ease-in-out;
+    --animate-slide-up: slide-up 0.4s ease-out;
 
-  /* Keyframes */
-  @keyframes fade-in {
-    0%   { opacity: 0; }
-    100% { opacity: 1; }
-  }
+    /* Keyframes */
+    @keyframes fade-in {
+        0% {
+            opacity: 0;
+        }
+        100% {
+            opacity: 1;
+        }
+    }
 
-  @keyframes slide-up {
-    0%   { transform: translateY(10px); opacity: 0; }
-    100% { transform: translateY(0);    opacity: 1; }
-  }
+    @keyframes slide-up {
+        0% {
+            transform: translateY(10px);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
 
-  @keyframes pulse-slow {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.5; }
-  }
+    @keyframes pulse-slow {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
 }
 
 @layer base {
-  :root {
-    color-scheme: dark;
-  }
-  html {
-    font-family: var(--font-sans);
-  }
-  body {
-    @apply bg-black text-gray-100 min-h-screen;
-  }
+    :root {
+        color-scheme: dark;
+    }
+    html {
+        font-family: var(--font-sans);
+    }
+    body {
+        @apply bg-black text-gray-100 min-h-screen;
+    }
 }
 
 @layer components {
-  .glass {
-    @apply bg-white/[0.03] backdrop-blur-[12px] border border-white/[0.07];
-  }
+    .glass {
+        @apply bg-white/[0.03] backdrop-blur-[12px] border border-white/[0.07];
+    }
 
-  .glow-brand {
-    box-shadow: 0 0 30px rgba(20, 184, 166, 0.2);
-  }
+    .glow-brand {
+        box-shadow: 0 0 30px rgba(20, 184, 166, 0.2);
+    }
 
-  .video-container {
-    @apply relative w-full bg-[#050505] rounded-2xl overflow-hidden;
-  }
+    .video-container {
+        @apply relative w-full bg-[#050505] rounded-2xl overflow-hidden;
+    }
 }
