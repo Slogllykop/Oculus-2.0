@@ -205,42 +205,50 @@ export default function Toolbox() {
 			debug: 2,
 			config: {
 				iceServers: [
+					// { urls: "stun:stun.l.google.com:19302" },
+					// { urls: "stun:stun1.l.google.com:19302" },
+					// { urls: "stun:stun2.l.google.com:19302" },
+					// { urls: "stun:stun3.l.google.com:19302" },
+					// { urls: "stun:stun4.l.google.com:19302" },
+					// { urls: "stun:global.stun.twilio.com:3478" },
+					// // Add your TURN servers here for 100% reliability (e.g., Metered.ca)
+					// /*
+					// {
+					// 	urls: "turn:your-turn-server.com:3478",
+					// 	username: "your-username",
+					// 	credential: "your-password"
+					// }
+					// */ {
+					// 	urls: "stun:stun.relay.metered.ca:80",
+					// },
+					// {
+					// 	urls: "turn:global.relay.metered.ca:80",
+					// 	username: "0ec1be57ed8f94ea397c6826",
+					// 	credential: "bb3JZ7XOD+uXJwkz",
+					// },
+					// {
+					// 	urls: "turn:global.relay.metered.ca:80?transport=tcp",
+					// 	username: "0ec1be57ed8f94ea397c6826",
+					// 	credential: "bb3JZ7XOD+uXJwkz",
+					// },
+					// {
+					// 	urls: "turn:global.relay.metered.ca:443",
+					// 	username: "0ec1be57ed8f94ea397c6826",
+					// 	credential: "bb3JZ7XOD+uXJwkz",
+					// },
+					// {
+					// 	urls: "turns:global.relay.metered.ca:443?transport=tcp",
+					// 	username: "0ec1be57ed8f94ea397c6826",
+					// 	credential: "bb3JZ7XOD+uXJwkz",
+					// },
 					{ urls: "stun:stun.l.google.com:19302" },
 					{ urls: "stun:stun1.l.google.com:19302" },
 					{ urls: "stun:stun2.l.google.com:19302" },
 					{ urls: "stun:stun3.l.google.com:19302" },
 					{ urls: "stun:stun4.l.google.com:19302" },
 					{ urls: "stun:global.stun.twilio.com:3478" },
-					// Add your TURN servers here for 100% reliability (e.g., Metered.ca)
-					/*
-					{
-						urls: "turn:your-turn-server.com:3478",
-						username: "your-username",
-						credential: "your-password"
-					}
-					*/ {
-						urls: "stun:stun.relay.metered.ca:80",
-					},
-					{
-						urls: "turn:global.relay.metered.ca:80",
-						username: "0ec1be57ed8f94ea397c6826",
-						credential: "bb3JZ7XOD+uXJwkz",
-					},
-					{
-						urls: "turn:global.relay.metered.ca:80?transport=tcp",
-						username: "0ec1be57ed8f94ea397c6826",
-						credential: "bb3JZ7XOD+uXJwkz",
-					},
-					{
-						urls: "turn:global.relay.metered.ca:443",
-						username: "0ec1be57ed8f94ea397c6826",
-						credential: "bb3JZ7XOD+uXJwkz",
-					},
-					{
-						urls: "turns:global.relay.metered.ca:443?transport=tcp",
-						username: "0ec1be57ed8f94ea397c6826",
-						credential: "bb3JZ7XOD+uXJwkz",
-					},
+					{ urls: "stun:stun.nextcloud.com:443" },
+					{ urls: "stun:stun.cloudflare.com:3478" },
 				],
 				iceCandidatePoolSize: 10,
 			},
