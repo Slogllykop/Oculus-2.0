@@ -25,10 +25,11 @@ dist-ssr
 *.sw?
 
 # Agent files
-.agent/
+.agents/
 
 # Webstore
 webstore/
 
 # Misc 
 CHANGELOG.md
+skills-lock.json
