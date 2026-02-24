@@ -329,7 +329,7 @@ export default function Home() {
                                         {i === 0 && (
                                             <WebstoreIcon
                                                 className={`w-5 h-5 color- ${c.text}`}
-                                                fill={c.text}
+                                                fill="#3b82f6"
                                                 aria-hidden="true"
                                             />
                                         )}
