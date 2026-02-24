@@ -1,5 +1,13 @@
+import type { Metadata } from "next";
 import WatchClient from "@/components/WatchClient";
 
+export const metadata: Metadata = {
+    title: "Watching Session",
+    robots: {
+        index: false,
+        follow: false,
+    },
+};
 interface PageProps {
     params: Promise<{ sessionId: string }>;
 }

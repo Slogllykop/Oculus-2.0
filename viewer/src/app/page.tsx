@@ -1,6 +1,5 @@
 import {
     ArrowRight,
-    Chrome,
     Globe,
     Lock,
     Monitor,
@@ -10,8 +9,8 @@ import {
     Zap,
 } from "lucide-react";
 import Image from "next/image";
-import { WEBSTORE_LINK } from "@/constants";
 import WebstoreIcon from "@/components/WebstoreIcon";
+import { WEBSTORE_LINK } from "@/constants";
 
 const FEATURES = [
     {
@@ -117,6 +116,7 @@ export default function Home() {
                         alt="Oculus Logo"
                         width={36}
                         height={36}
+                        priority
                         className="w-9 h-9 object-contain"
                     />
                     <span className="text-lg font-bold text-white tracking-wide">Oculus</span>
@@ -291,7 +291,7 @@ export default function Home() {
                     </div>
                     {/* Glow beneath mockup */}
                     <div
-                        className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-16 bg-accent-blue/15 blur-[40px] rounded-full pointer-events-none"
+                        className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-16 bg-accent-blue/15 blur-2xl rounded-full pointer-events-none"
                         aria-hidden="true"
                     />
                 </div>

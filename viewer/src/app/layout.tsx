@@ -17,12 +17,13 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+    metadataBase: new URL("https://oculus.isdevs.cv"),
     title: {
-        default: "Oculus | Free Peer-to-Peer Screen Sharing in Your Browser",
+        default: "Oculus | Free Peer-to-Peer Screen Sharing",
         template: "%s | Oculus Screen Share",
     },
     description:
-        "Experience lightning-fast, secure, and free peer-to-peer screen sharing directly from your browser. No downloads, no sign-ups, and no servers required. Share your screen instantly with WebRTC.",
+        "Lightning-fast, secure, and free peer-to-peer screen sharing from your browser. No downloads or sign-ups required. Share instantly with WebRTC.",
     keywords: [
         "screen sharing",
         "peer-to-peer",
@@ -68,6 +69,9 @@ export const metadata: Metadata = {
             "max-image-preview": "large",
             "max-snippet": -1,
         },
+    },
+    alternates: {
+        canonical: "/",
     },
     category: "technology",
     icons: {
