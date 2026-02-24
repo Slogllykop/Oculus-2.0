@@ -10,6 +10,8 @@ import {
     Zap,
 } from "lucide-react";
 import Image from "next/image";
+import { WEBSTORE_LINK } from "@/constants";
+import WebstoreIcon from "@/components/WebstoreIcon";
 
 const FEATURES = [
     {
@@ -120,12 +122,12 @@ export default function Home() {
                     <span className="text-lg font-bold text-white tracking-wide">Oculus</span>
                 </div>
                 <a
-                    href="https://chromewebstore.google.com"
+                    href={WEBSTORE_LINK}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-black text-sm font-semibold transition-all hover:bg-zinc-200 hover:scale-[1.02] active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                 >
-                    <Chrome className="w-4 h-4" aria-hidden="true" />
+                    <WebstoreIcon className="size-4" aria-hidden="true" />
                     Add to Chrome
                 </a>
             </nav>
@@ -197,12 +199,12 @@ export default function Home() {
                         style={{ animationDelay: "0.5s" }}
                     >
                         <a
-                            href="https://chromewebstore.google.com"
+                            href={WEBSTORE_LINK}
                             target="_blank"
                             rel="noreferrer"
                             className="flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-white text-black font-bold text-base transition-all shadow-[0_0_40px_rgba(59,130,246,0.15)] hover:shadow-[0_0_60px_rgba(59,130,246,0.25)] hover:scale-[1.03] active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                         >
-                            <Chrome className="w-5 h-5" aria-hidden="true" />
+                            <WebstoreIcon className="size-5" aria-hidden="true" />
                             Get Oculus for Chrome
                             <ArrowRight className="w-4 h-4" aria-hidden="true" />
                         </a>
@@ -325,8 +327,9 @@ export default function Home() {
                                         className={`w-10 h-10 rounded-xl ${c.bg} border ${c.border} flex items-center justify-center mb-5`}
                                     >
                                         {i === 0 && (
-                                            <Chrome
-                                                className={`w-5 h-5 ${c.text}`}
+                                            <WebstoreIcon
+                                                className={`w-5 h-5 color- ${c.text}`}
+                                                fill={c.text}
                                                 aria-hidden="true"
                                             />
                                         )}
@@ -446,12 +449,12 @@ export default function Home() {
                         free, fast, and lives right in your browser.
                     </p>
                     <a
-                        href="https://chromewebstore.google.com"
+                        href={WEBSTORE_LINK}
                         target="_blank"
                         rel="noreferrer"
                         className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-white text-black font-bold text-base transition-all shadow-[0_0_40px_rgba(59,130,246,0.12)] hover:shadow-[0_0_60px_rgba(59,130,246,0.2)] hover:scale-[1.03] active:scale-[0.98] cursor-pointer focus-visible:ring-2 focus-visible:ring-accent-blue focus-visible:ring-offset-2 focus-visible:ring-offset-black"
                     >
-                        <Chrome className="w-5 h-5" aria-hidden="true" />
+                        <WebstoreIcon className="size-5" aria-hidden="true" />
                         Install Oculus - It&apos;s Free
                         <ArrowRight className="w-4 h-4" aria-hidden="true" />
                     </a>
