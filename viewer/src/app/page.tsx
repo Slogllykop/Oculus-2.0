@@ -133,19 +133,19 @@ export default function Home() {
             </nav>
 
             {/* ─── Hero ─────────────────────────────────────────── */}
-            <section className="flex-1 flex flex-col items-center justify-center px-6 pt-24 pbbg-accent-violet/4e">
+            <section className="flex-1 flex flex-col items-center justify-center px-6 pt-24 relative overflow-hidden">
                 {/* Background orbs - multi-color */}
                 <div
-                    className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-accent-blue/4 blur-[150px] pointer-events-none animate-float"
+                    className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-accent-blue/15 blur-[120px] pointer-events-none animate-float"
                     aria-hidden="true"
                 />
                 <div
-                    className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-accent-violet/4 blur-[130px] pointer-events-none animate-float"
+                    className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-accent-violet/12 blur-[100px] pointer-events-none animate-float"
                     style={{ animationDelay: "2s" }}
                     aria-hidden="true"
                 />
                 <div
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-accent-green/3 blur-[160px] pointer-events-none"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-accent-green/8 blur-[140px] pointer-events-none"
                     aria-hidden="true"
                 />
 
@@ -291,7 +291,7 @@ export default function Home() {
                     </div>
                     {/* Glow beneath mockup */}
                     <div
-                        className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-16 bg-accent-blue/6 blur-[50px] rounded-full pointer-events-none"
+                        className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-2/3 h-16 bg-accent-blue/15 blur-[40px] rounded-full pointer-events-none"
                         aria-hidden="true"
                     />
                 </div>
