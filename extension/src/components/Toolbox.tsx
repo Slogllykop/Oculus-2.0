@@ -84,7 +84,14 @@ export default function Toolbox() {
                 elapsedTime={elapsedTime}
             />
 
-            <div className="flex flex-1 gap-6 p-6 max-w-5xl mx-auto w-full relative z-10 animate-fade-in">
+            <div className="flex flex-1 gap-6 p-6 max-w-7xl mx-auto w-full relative z-10 animate-fade-in">
+                {/* Stats Column */}
+                <div className="w-64 flex flex-col gap-4">
+                    <ViewerCountCard count={peer.viewerCount} />
+                    <LatencyIndicator latencyMs={latencyMs} latencyLevel={latencyLevel} />
+                    <StreamQualityIndicator quality={streamQuality} />
+                </div>
+
                 {/* Preview Column */}
                 <div className="flex-1 flex flex-col gap-4">
                     <StreamPreview
@@ -121,12 +128,6 @@ export default function Toolbox() {
                         hasOutStream={!!peer.outStreamRef.current}
                         onToggleAudio={capture.toggleAudio}
                     />
-
-                    <ViewerCountCard count={peer.viewerCount} />
-
-                    <LatencyIndicator latencyMs={latencyMs} latencyLevel={latencyLevel} />
-
-                    <StreamQualityIndicator quality={streamQuality} />
 
                     {capture.streamState === "live" && (
                         <button
