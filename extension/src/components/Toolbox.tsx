@@ -78,11 +78,7 @@ export default function Toolbox() {
                 aria-hidden="true"
             />
 
-            <ToolboxHeader
-                streamState={capture.streamState}
-                viewerCount={peer.viewerCount}
-                elapsedTime={elapsedTime}
-            />
+            <ToolboxHeader streamState={capture.streamState} elapsedTime={elapsedTime} />
 
             <div className="flex flex-1 gap-6 p-6 max-w-7xl mx-auto w-full relative z-10 animate-fade-in">
                 {/* Stats Column */}

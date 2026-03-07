@@ -7,17 +7,28 @@ import manifest from "./manifest.json";
 
 export default defineConfig({
     plugins: [
+        crx({ manifest }),
         react({
             babel: {
                 plugins: [["babel-plugin-react-compiler"]],
             },
         }),
         tailwindcss(),
-        crx({ manifest }),
     ],
     resolve: {
         alias: {
             "@": path.resolve(__dirname, "./src"),
+        },
+    },
+    server: {
+        port: 5173,
+        strictPort: true,
+        hmr: {
+            port: 5173,
+        },
+        cors: {
+            origin: "*",
+            methods: "*",
         },
     },
     build: {
