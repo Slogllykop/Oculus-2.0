@@ -1,12 +1,16 @@
 import { RefreshCw, Square } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { VIEWER_BASE_URL } from "@/constants";
+import { useConnectionStats } from "@/hooks/useConnectionStats";
+import { useElapsedTime } from "@/hooks/useElapsedTime";
 import { usePeerConnection } from "@/hooks/usePeerConnection";
 import { useScreenCapture } from "@/hooks/useScreenCapture";
 import { AudioPanel } from "./toolbox/AudioPanel";
+import { LatencyIndicator } from "./toolbox/LatencyIndicator";
 import { QualityPanel } from "./toolbox/QualityPanel";
 import { ShareUrlBar } from "./toolbox/ShareUrlBar";
 import { StreamPreview } from "./toolbox/StreamPreview";
+import { StreamQualityIndicator } from "./toolbox/StreamQualityIndicator";
 import { ToolboxHeader } from "./toolbox/ToolboxHeader";
 import { ViewerCountCard } from "./toolbox/ViewerCountCard";
 
@@ -52,6 +56,15 @@ export default function Toolbox() {
         startCaptureRef.current = capture.startCapture;
     }, [capture.startCapture]);
 
+    // ─── Elapsed time ─────────────────────────────────────────────────────────
+    const elapsedTime = useElapsedTime(capture.streamState);
+
+    // ─── Connection stats (latency + stream quality) ────────────────────────────
+    const { latencyMs, latencyLevel, streamQuality } = useConnectionStats(
+        peer.mediaCallsRef,
+        capture.streamState === "live",
+    );
+
     return (
         <div className="min-h-screen bg-surface-0 text-white font-sans flex flex-col relative overflow-hidden">
             {/* Background orbs */}
@@ -65,7 +78,11 @@ export default function Toolbox() {
                 aria-hidden="true"
             />
 
-            <ToolboxHeader streamState={capture.streamState} viewerCount={peer.viewerCount} />
+            <ToolboxHeader
+                streamState={capture.streamState}
+                viewerCount={peer.viewerCount}
+                elapsedTime={elapsedTime}
+            />
 
             <div className="flex flex-1 gap-6 p-6 max-w-5xl mx-auto w-full relative z-10 animate-fade-in">
                 {/* Preview Column */}
@@ -106,6 +123,10 @@ export default function Toolbox() {
                     />
 
                     <ViewerCountCard count={peer.viewerCount} />
+
+                    <LatencyIndicator latencyMs={latencyMs} latencyLevel={latencyLevel} />
+
+                    <StreamQualityIndicator quality={streamQuality} />
 
                     {capture.streamState === "live" && (
                         <button

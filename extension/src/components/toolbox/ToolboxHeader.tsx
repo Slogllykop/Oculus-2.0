@@ -1,14 +1,15 @@
-import { Users } from "lucide-react";
+import { Clock, Users } from "lucide-react";
 import { STATUS_COLORS, STATUS_LABELS } from "@/constants";
 import type { StreamState } from "@/types";
 
 interface ToolboxHeaderProps {
     streamState: StreamState;
     viewerCount: number;
+    elapsedTime: string;
 }
 
-/** Sticky top bar with branding, stream status pill, and viewer count badge. */
-export function ToolboxHeader({ streamState, viewerCount }: ToolboxHeaderProps) {
+/** Sticky top bar with branding, stream status pill, elapsed time, and viewer count badge. */
+export function ToolboxHeader({ streamState, viewerCount, elapsedTime }: ToolboxHeaderProps) {
     return (
         <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-surface-1/80 backdrop-blur-md sticky top-0 z-10 animate-fade-in shadow-xl">
             <div className="flex items-center gap-3">
@@ -30,6 +31,14 @@ export function ToolboxHeader({ streamState, viewerCount }: ToolboxHeaderProps) 
                         {STATUS_LABELS[streamState]}
                     </span>
                 </div>
+                {streamState === "live" && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-2 border border-white/5 shadow-inner">
+                        <Clock className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
+                        <span className="text-xs font-bold tracking-wide text-zinc-300 font-mono tabular-nums">
+                            {elapsedTime}
+                        </span>
+                    </div>
+                )}
                 <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-2 border border-white/5 shadow-inner">
                     <Users className="w-3.5 h-3.5 text-zinc-400" aria-hidden="true" />
                     <span className="text-xs font-bold tracking-wide text-zinc-300">

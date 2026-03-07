@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { VIEWER_BASE_URL } from "./constants";
 import { useClipboard } from "./hooks/useClipboard";
+import { useElapsedTime } from "./hooks/useElapsedTime";
 
 type State = "idle" | "broadcasting" | "error";
 
@@ -11,6 +12,10 @@ export default function App() {
     const [shareUrl, setShareUrl] = useState<string>("");
     const [error, setError] = useState("");
     const { copied, copy } = useClipboard();
+
+    // Map popup state to StreamState for the elapsed time hook
+    const streamState = state === "broadcasting" ? "live" : "idle";
+    const elapsedTime = useElapsedTime(streamState as "live" | "idle");
 
     useEffect(() => {
         chrome.runtime.sendMessage({ type: "GET_SESSION" }, (res) => {
@@ -71,13 +76,16 @@ export default function App() {
                     <p className="text-xs text-zinc-500 font-medium">Screen Broadcasting</p>
                 </div>
                 {state === "broadcasting" && (
-                    <div className="ml-auto flex items-center gap-1.5">
+                    <div className="ml-auto flex items-center gap-2">
                         <span
                             className="w-2 h-2 rounded-full bg-accent-red animate-pulse"
                             aria-hidden="true"
                         />
                         <span className="text-xs text-accent-red-light font-bold tracking-wide">
                             LIVE
+                        </span>
+                        <span className="text-[10px] text-zinc-400 font-mono tabular-nums">
+                            {elapsedTime}
                         </span>
                     </div>
                 )}
