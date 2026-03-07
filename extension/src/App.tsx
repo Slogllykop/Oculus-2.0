@@ -212,7 +212,7 @@ export default function App() {
             {/* Footer */}
             <div className="px-5 py-3 border-t border-white/4 flex items-center justify-between relative z-10">
                 <span className="text-xs text-zinc-600 font-medium">P2P · Secure · No Servers</span>
-                <span className="text-xs text-zinc-600 font-mono font-medium">v2.0.2</span>
+                <span className="text-xs text-zinc-600 font-mono font-medium">v2.0.3</span>
             </div>
         </div>
     );
